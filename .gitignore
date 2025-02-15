@@ -1,0 +1,75 @@
+# WordPress specific files
+wp-config.php
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/backup-db/
+wp-content/cache/
+wp-content/backups/
+
+# WordPress core (if not on .gitignore already)
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/index.php
+/xmlrpc.php
+/license.txt
+/readme.html
+
+# Configuration files
+*.log
+.htaccess
+sitemap.xml
+sitemap.xml.gz
+
+# Development & IDE files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+*.orig
+*~
+
+# Node modules and build files
+node_modules/
+bower_components/
+dist/
+build/
+
+# Sass/SCSS cache
+.sass-cache/
+*.css.map
+*.sass.map
+*.scss.map
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Composer dependencies
+vendor/
+composer.phar
+
+# Package manager files
+package-lock.json
+yarn.lock
+
+# Temporary files
+tmp/
+temp/
+
+# Local development files
+*.local
+*.local.*
+
+# Debug files
+debug.log
+error_log
+
+# Backup files
+*.bak
+*.backup
+*.old
