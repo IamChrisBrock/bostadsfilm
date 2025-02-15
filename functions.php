@@ -1,7 +1,12 @@
 <?php
 add_filter('show_admin_bar', '__return_false');
-// Colors
+
+// Include theme files
 require get_template_directory() . '/inc/colors.php';
+require get_template_directory() . '/inc/custom-post-types.php';
+require get_template_directory() . '/inc/custom-taxonomies.php';
+require get_template_directory() . '/inc/meta-boxes.php';
+require get_template_directory() . '/inc/shortcodes.php';
 function mytheme_theme_setup() {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
@@ -27,7 +32,20 @@ function mytheme_enqueue_scripts() {
     wp_enqueue_style('mytheme-style', get_stylesheet_uri());
     wp_enqueue_script('fade-in-script', get_template_directory_uri() . '/assets/js/section-observer-fade-in.js', array(), false, true);
     wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js');
-    
+
+    // Gallery scripts
+    if (is_post_type_archive('project_gallery') || is_singular('project_gallery') || is_page_template('templates/portfolio.php')) {
+        wp_enqueue_script('masonry');
+        wp_enqueue_script('imagesloaded');
+        wp_enqueue_script('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js', array(), '3.2.0', true);
+        wp_enqueue_style('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/css/glightbox.min.css');
+        wp_enqueue_script('gallery-js', get_template_directory_uri() . '/assets/js/gallery.js', array('jquery', 'masonry', 'imagesloaded', 'glightbox'), '1.0', true);
+    }
+
+    // Admin scripts
+    if (is_admin()) {
+        wp_enqueue_script('admin-js', get_template_directory_uri() . '/assets/js/admin.js', array('jquery', 'jquery-ui-sortable'), '1.0', true);
+    }
 }
 
 add_action('wp_enqueue_scripts', 'mytheme_enqueue_scripts');
@@ -1333,5 +1351,85 @@ function custom_contact_form7() {
     }
 }
 add_shortcode('custom_contact_form', 'custom_contact_form7');
+
+// AJAX handlers for media tags
+function add_media_tag() {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'project_gallery_media_nonce')) {
+        wp_send_json_error('Invalid nonce');
+    }
+
+    $attachment_id = intval($_POST['attachment_id']);
+    $tag = sanitize_text_field($_POST['tag']);
+
+    if (!$attachment_id || !$tag) {
+        wp_send_json_error('Invalid data');
+    }
+
+    // Check if tag already exists on this attachment
+    $existing_tags = wp_get_object_terms($attachment_id, 'project_tags', array('fields' => 'names'));
+    
+    if (in_array($tag, array_map('strtolower', $existing_tags))) {
+        wp_send_json_error('Tag already exists');
+        return;
+    }
+
+    $result = wp_set_object_terms($attachment_id, $tag, 'project_tags', true);
+    
+    if (is_wp_error($result)) {
+        wp_send_json_error($result->get_error_message());
+    }
+
+    wp_send_json_success();
+}
+add_action('wp_ajax_add_media_tag', 'add_media_tag');
+
+function remove_media_tag() {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'project_gallery_media_nonce')) {
+        wp_send_json_error('Invalid nonce');
+    }
+
+    $attachment_id = intval($_POST['attachment_id']);
+    $tag = sanitize_text_field($_POST['tag']);
+
+    if (!$attachment_id || !$tag) {
+        wp_send_json_error('Invalid data');
+    }
+
+    $result = wp_remove_object_terms($attachment_id, $tag, 'project_tags');
+    
+    if (is_wp_error($result)) {
+        wp_send_json_error($result->get_error_message());
+    }
+
+    wp_send_json_success();
+}
+add_action('wp_ajax_remove_media_tag', 'remove_media_tag');
+
+// AJAX handler for tag suggestions
+function get_tag_suggestions() {
+    if (!isset($_GET['term'])) {
+        wp_send_json_error('No search term provided');
+    }
+
+    $term = sanitize_text_field($_GET['term']);
+    
+    $tags = get_terms(array(
+        'taxonomy' => 'project_tags',
+        'hide_empty' => false,
+        'search' => $term,
+        'number' => 10
+    ));
+
+    $suggestions = array();
+    foreach ($tags as $tag) {
+        $suggestions[] = array(
+            'value' => $tag->name,
+            'label' => $tag->name
+        );
+    }
+
+    wp_send_json_success($suggestions);
+}
+add_action('wp_ajax_get_tag_suggestions', 'get_tag_suggestions');
 
 ?>
