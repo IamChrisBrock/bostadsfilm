@@ -121,7 +121,7 @@ $lottie_url = $lottie_file_id ? wp_get_attachment_url($lottie_file_id) : '';
             <div class="col-12">
             <h1 class="section-title"><?php 
             echo $cpt_name;
-    ?></h1></div></div><?php }?>
+    ?></h1></div></div><?php }?> 
         <div class="row">
     <div class="col-12 col-xl-6 col-lg-4 hidden-for-observer <?php echo $service_order_class . " " . $service_text_wrapper_class;?> <?php echo ($layout === 'Left' ? 'fade-in-left' : 'fade-in-right')?>">
     <div class="container">
