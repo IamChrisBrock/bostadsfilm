@@ -1,0 +1,731 @@
+/*
+Theme Name: FilmEstate - A Real Estate Video Theme
+Theme URI: https://inkperial.com/FilmEstate
+Author: Chris Brock
+Author URI: https://inkperial.com
+Description: A real estate-focused WordPress theme with Elementor support.
+Version: 1.0
+License: GPL-2.0+
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: revt-theme
+*/
+
+@font-face {
+    font-family: 'Made Tommy Regular';
+    src: url('assets/fonts/MADE-TOMMY-Regular.woff') format('woff');
+}
+@font-face {
+    font-family: 'Made Tommy Light';
+    src: url('assets/fonts/MADE-TOMMY-Light.woff') format('woff');
+}
+
+html body {
+    background-color: var(--page-bg-color) !important;
+    margin: 0;
+    font-family: 'Made Tommy Regular', sans-serif;
+}
+
+
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+
+.image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.zoom-effect:hover img {
+    transform: scale(1.05);
+}
+
+@media (min-width: 1200px) {
+    .break-out .image-container {
+        max-width: calc(100vw - ((100vw - 1400px) / 2));
+    }
+    
+    .break-out.order-2 .image-container {
+        margin-right: calc(-50vw + ((100vw - 1400px) / 2));
+    }
+    
+    .break-out.order-1 .image-container {
+        margin-left: calc(-50vw + ((100vw - 1400px) / 2));
+    }
+}
+
+/* Main Menu */
+@media (max-width:992px){
+.container{
+    max-width:100% !important;
+}
+}
+.container-fluid{
+    overflow: hidden;
+}
+@media (min-width: 1200px) {
+.container{
+    max-width:1400px !important;
+}
+}
+
+
+/* Full width, full height for header background */
+.header-wrapper {
+    display: flex;
+    align-items: center;  /* Centers vertically */
+    justify-content: center; /* Centers horizontally */
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    text-align: center;
+    z-index: 1;
+}
+
+.header-title {
+    position: relative;
+    z-index: 2; /* Ensures it appears above the video/image */
+    color: white; /* Adjust text color for visibility */
+    font-size: 2.5rem; /* Adjust as needed */
+    padding: 20px;
+    font-weight: 100;
+    font-family: 'EB+Garamond';
+}
+
+.header-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.header-background video,
+.header-background .header-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-background .header-image {
+    background-size: cover;
+    background-position: center;
+}
+
+.section-title{
+    font-size: 4rem;
+    font-family: 'Made Tommy Regular', sans-serif;
+    font-weight: normal;
+    margin-bottom: 50px;
+}
+@media (max-width: 768px){
+    .section-title{
+    font-size: 3rem;
+    margin-bottom: 25px;
+    margin-top: 35px;
+    text-align: center;
+    }
+
+}
+#get-in-touch{
+    padding-top:50px;
+}
+#services{
+    background-color:var(--primary-bg-color);
+    z-index: 300;
+    position: relative;
+    
+}
+.service-post-container{
+    padding:100px 0px 50px 0px;
+    background-color: var(--third-text-color);
+}
+@media (max-width:992px){
+    .service-post-container{
+        padding: 50px 0px 100px 0px;
+    }   
+}
+
+.service-text-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: last baseline;
+    margin-bottom:85px;
+}
+.service-text-wrapper-right{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom:85px;
+}
+@media (max-width:768px){
+    .service-text-wrapper{
+    padding: 0px 25px !important;
+    margin-bottom:25px;
+    }
+    .service-text-wrapper-right{
+        padding: 0px 25px !important;
+        margin-bottom:25px;
+    }
+}
+
+.service-title-wrapper{
+    width:70%;
+    margin-left: 25px;
+}
+
+@media (max-width:992px){
+    .service-title-wrapper{
+        margin: 0 auto;
+        width: 430px;
+    }
+}
+@media (max-width:576px){
+    .service-title-wrapper{
+        max-width:100%;
+        margin-left: 0px;
+    }   
+}
+
+.content-title{
+    font-family: 'EB+Garamond';
+    margin: 30px 0px 0px 0px;
+    padding: 0;
+    color: var(--primary-headline-color);
+    font-weight: 800;
+    font-size: 2.2rem;
+}
+
+.text-content p{
+    line-height: 1.8rem;
+    font-size: 1.1rem;
+    font-weight: 100;
+}
+.section-transition{
+    z-index: 500;
+    height: 50px;
+    position: relative;
+}
+.image-container {
+    overflow: hidden;
+    width: 100%;
+    height: auto;
+    display: inline-block; /* Ensures the container shrinks to the size of the image */
+  }
+.image-padding-left{
+    
+}
+/* ANIMATIONS */
+
+  
+  .zoom-effect img {
+    transition: transform 1.3s ease;
+    object-fit: cover; /* Ensures the image scales proportionally */
+    width: 100%;
+    height: auto;
+  }
+  
+  .zoom-effect:hover img {
+    transform: scale(1.03); /* Zooms the image by 20% */
+  }
+.scroll-line {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 0; /* Initial height of the line (invisible) */
+    background-color: black;
+    transition: height 0.5s ease-in-out; /* Add a smooth transition for drawing */
+}
+
+.scroll-line.visible {
+    height: 200px; /* The height it will reach when it's drawn */
+    transition: height 1.5s ease-in-out; /* Add a smooth transition for drawing */
+}
+@media (min-width:992px) and (max-width:1200px){
+    .scroll-line {
+        position: absolute;
+        top: 0;
+        left: 30%;
+        width: 1px;
+        height: 0; /* Initial height of the line (invisible) */
+        background-color: black;
+        transition: height 0.5s ease-in-out; /* Add a smooth transition for drawing */
+    }
+}
+@media (max-width:768px){
+    .scroll-line.visible {
+        height: 100px; /* The height it will reach when it's drawn */
+        transition: height 1.5s ease-in-out; /* Add a smooth transition for drawing */
+    }
+}
+
+.main-image img{
+    max-width: 100%;
+    height: auto;
+    display: block; /* Optional: removes bottom space below the image */
+    
+}
+
+.portfolio-link,
+.portfolio-link * {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    color: var(--link-color);
+    transition: color 0.2s ease-in-out;
+}
+.portfolio-link:hover,
+.portfolio-link:hover * {
+    color: var(--link-hover-color) !important;
+}
+
+.portfolio-link-container{
+    display: flex;
+    align-items: center;
+    margin-top: 25px;
+    margin-left: 0px !important;
+    padding-left: 0px !important;
+}
+.portfolio-link-icon {
+    width: 38px;
+    transition: color 0.2s ease-in-out;
+}
+.portfolio-link-icon svg {
+    width: 100%;
+    height: auto;
+    max-width: 50px; /* Set a reasonable max width */
+}
+.portfolio-link-icon-wrapper{
+    float:left;
+    display: flex;
+    align-items: center;
+    height:100%;
+}
+@media (max-width:768px){
+    .portfolio-link-icon {
+        width:35px;
+        height: 35px;
+    }
+}
+.portfolio-text-wrapper{
+    margin-left:10px;
+    float:left;
+    display:flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    
+}
+.portfolio-link-text{
+    line-height: 1.5rem;
+    font-size: 1.5rem;
+    font-family: 'EB+Garamond';
+    margin-bottom: -3px;
+  }
+.portfolio-link-subtext{
+    font-size: 0.9rem;
+}
+@media (max-width:576px){
+    .portfolio-link-text{
+        font-size: 1.2rem;
+        margin-bottom: -5px;
+    }
+    .portfolio-link-subtext{
+        font-size: 0.8rem;;
+    }
+}
+
+.portfolio-link-arrow.hover-lottie {
+    color: var(--link-color);
+    transition: color 0.2s ease-in-out;
+}
+
+.portfolio-link:hover .portfolio-link-arrow.hover-lottie {
+    color: var(--link-hover-color);
+}
+
+@media (max-width:576px){
+    .portfolio-link-arrow.hover-lottie{
+        display:none;
+    }
+}
+.primary-colors{
+    background-color: var(--primary-bg-color);
+    color: var(--primary-text-color);
+}
+.secondary-colors{
+    background-color: var(--secondary-bg-color);
+    color: var(--secondary-text-color);
+}
+.primary-link-colors, .primary-link-colors *{
+    color:var(--primary-link-color) !important;
+}
+.secondary-link-colors, .secondary-link-colors *{
+    color:var(--secondary-link-color) !important;
+}
+.primary-link-colors:hover, .primary-link-colors:hover *{
+    color:var(--primary-link-hover-color)  !important;
+}
+.secondary-link-colors:hover, .secondary-link-colors:hover * {
+    color:var(--secondary-link-hover-color) !important;
+}
+.hover-lottie {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.hover-lottie div.lottie-arrow {
+    margin-left: 10px;  /* Adjust distance from the link */
+    pointer-events: none;  /* Ensures the animation doesn't block clicking the link */
+}
+@media (min-width: 1200px) {
+.left-margin-25{
+    margin:0px 0px 0px 15px;
+}
+.right-margin-25{
+    margin:0px 15px 0px 0px;
+}
+}
+
+@media (min-width: 1200px) {
+    .left-spacing{
+        padding-left:25px !important;
+    }
+    .right-spacing{
+        padding-right:25px !important;
+    }
+    }
+
+.my-custom-lottie {
+    height: 63px;
+}
+.fade-in-top, .fade-in-bottom {
+    opacity: 0;
+    transform: translateY(-30px); 
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.fade-in-bottom {
+    transform: translateY(30px); 
+}
+.fade-in-left, .fade-in-right {
+    opacity: 0;
+    transform: translateX(-30px); 
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.fade-in-left {
+    transform: translateX(30px); 
+}
+
+.fade-in-left.visible, .fade-in-right.visible, .fade-in-bottom.visible, .fade-in-top.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+.fade-in-left:nth-child(1), .fade-in-right:nth-child(1),.fade-in-bottom:nth-child(1), .fade-in-top:nth-child(1) { transition-delay: 0.2s; }
+.fade-in-left:nth-child(2), .fade-in-right:nth-child(2),.fade-in-bottom:nth-child(2), .fade-in-top:nth-child(2) { transition-delay: 0.6s; }
+.fade-in-left:nth-child(3), .fade-in-right:nth-child(3),.fade-in-bottom:nth-child(3), .fade-in-top:nth-child(3) { transition-delay: 1s; }
+.fade-in-left:nth-child(4), .fade-in-right:nth-child(4),.fade-in-bottom:nth-child(4), .fade-in-top:nth-child(4) { transition-delay: 1.4s; }
+.fade-in-left:nth-child(5), .fade-in-right:nth-child(5),.fade-in-bottom:nth-child(5), .fade-in-top:nth-child(5) { transition-delay: 1.8s; }
+.fade-in-left:nth-child(6), .fade-in-right:nth-child(6),.fade-in-bottom:nth-child(6), .fade-in-top:nth-child(6) { transition-delay: 2.2s; }
+
+
+.hidden-for-observer {
+    opacity: 0;
+}
+/*PAGE PRE LOADER */
+/* Fullscreen Loader */
+#preloader {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #272b24; /* Change this to match your design */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Loader Animation */
+.loader {
+    width: 60px;
+    height: 60px;
+    /* border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top: 5px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite; */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hide Preloader After Page Load */
+/* Statistics Section Styles */
+.statistics-section {
+    padding: 4rem 0;
+}
+
+.statistics-title {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.statistic-item {
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.statistic-image {
+    max-width: 80px !important;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.lottie-container {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+}
+
+.statistic-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--primary-headline-color);
+    margin: 1rem 0 0.5rem;
+}
+
+.statistic-text {
+    font-size: 1.3rem;
+    font-family: 'Made Tommy Light', sans-serif;
+    font-weight: 100;
+    margin: 0.5rem 0;
+    color: var(--primary-text-color) !important;
+}
+
+.statistic-source {
+    font-size: 0.8rem;
+    color: #666666;
+}
+/* Animated Words */
+.animated-word {
+    display: inline-block;
+    margin-right: 0.3em;
+    will-change: transform, opacity;
+}
+/* Animated Line */
+.animated-text-wrapper{
+    font-family: 'EB Garamond', serif;
+}
+.animated-line-container {
+    width: 100%;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.animated-line {
+    width: 100%;
+    height: 2px;
+    background-color: #000;
+    text-align: center;
+    transform: scaleX(0);
+    transition: transform 0.1s ease-in-out;
+}
+
+/* Info Text Styles */
+.info-text-section {
+    padding: 60px 0;
+}
+
+.info-text-section-title {
+    margin-bottom: 40px;
+}
+
+.info-text-item {
+    background: #fff;
+    text-align: center;
+    padding: 30px;
+    border-radius: 8px;
+    height: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.info-text-title {
+    font-family: 'EB+Garamond';
+    font-weight: bolder;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--primary-headline-color);
+}
+
+.info-text-content {
+    color: var(--primary-text-color);
+    line-height: 1.6;
+    font-size: 1.3rem;
+    line-height: 1.6;
+    font-family: 'Made Tommy Light', sans-serif;
+}
+
+@media (max-width:1400px){
+    .info-text-content {
+        font-size: 1.1rem;
+    }
+}
+
+
+
+.info-text-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+/* Media Text Styles */
+.media-text-section {
+    padding: 60px 0;
+}
+
+.media-text-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 100px;
+    position: relative;
+}
+
+.media-text-media {
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.media-text-media img,
+.media-text-media video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.media-text-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.animated-text-line {
+    margin: 0;
+    line-height: 1.1;
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--primary-text-color);
+
+}
+@media (max-width: 1400px) {
+    .animated-text-line {
+        font-size: 3rem;
+    }
+}
+@media (max-width:992px){
+    .animated-text-media-wrapper{
+    padding-bottom:25px !important;
+}
+.animated-text-wrapper{
+    padding-top:25px !important;
+    text-align: center !important;
+}
+}
+@media (min-width:992px){
+    .animated-text-media-wrapper{
+    padding-right:25px !important;
+}
+.animated-text-wrapper{
+    padding-left:25px !important;
+}
+}
+
+.animated-word {
+    display: inline-block;
+    margin: 0 0.2em;
+    opacity: 0.1;
+    will-change: opacity;
+    transition: opacity 0.2s ease-out;
+}
+
+
+
+.animated-line.animate {
+    transition: transform 2s ease-in-out;
+    transform: scaleX(1);
+;}
+
+.statistic-source {
+    margin: 0.25rem 0 0;
+    font-style: italic;
+}
+
+@media (max-width: 1400px) {
+    .statistics-title {
+        font-size: 2rem;
+    }
+    
+    .statistic-text {
+        font-size: 1.1rem;
+    }
+    .statistic-title {
+        font-size: 1rem;
+    }
+}
+
+.hidden-preloader {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+/*PAGE PRE LOADER END */
+/* Footer */
+.custom-footer {
+    position: relative;
+    z-index:100;
+    width: 100%;
+    background-size: cover;   /* Ensure the image fully covers the footer */
+    background-position: center;  /* Center the background image */
+    position: relative;
+    min-height: 200px; /* Set a minimum height for the footer */
+    padding: 20px 0; /* Some padding to ensure the footer has height */
+    max-height:800px;
+    min-height:400px;
+}
+
+.footer-content {
+    position: relative;
+    z-index: 1; /* Ensure footer content is above the background */
+    color: white;
+    text-align: center;
+    padding: 20px;
+    
+}
+
+a[href^="tel:"] {
+    color: var(--link-color); /* Set the color to your global link color */
+    text-decoration: none; /* Optional: Remove the underline */
+}
+
+a[href^="tel:"]:hover {
+    color: var(--link-hover-color); /* Change on hover */
+}
+

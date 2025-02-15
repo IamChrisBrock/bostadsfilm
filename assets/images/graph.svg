@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260.3 259.528">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 5px;
+      }
+    </style>
+  </defs>
+  <g id="Stats_Up" data-name="Stats Up">
+    <g id="Graph">
+      <g>
+        <path class="cls-1" d="M209.2,3.128s-16.1,40.7-78.8,88.1C67.7,138.628.8,151.428.8,151.428"/>
+        <polyline class="cls-1" points="172.9 13.228 209.2 3.128 216.7 40.128"/>
+        <line class="cls-1" y1="257.028" x2="260.3" y2="257.028"/>
+        <polyline class="cls-1" points="15.8 257.028 15.8 207.328 72.3 207.328 72.3 257.028"/>
+        <polyline class="cls-1" points="101.9 256.589 101.9 150.989 158.4 150.989 158.4 256.589"/>
+        <polyline class="cls-1" points="187.2 257.028 187.2 97.128 243.7 97.128 243.7 257.028"/>
+      </g>
+    </g>
+  </g>
+</svg>

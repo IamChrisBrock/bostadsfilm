@@ -1,0 +1,227 @@
+
+.main_menu_nav_container{
+    padding: 25px;    
+}
+.main_menu_logo{
+    height:50px;
+    float:left;
+}
+.main-nav{
+    background:transparent;
+}
+ul.nav-menu{
+    float:left;
+    list-style: none;
+}
+ul.nav-menu li{
+    display:inline-block;
+    margin:0px 15px;
+} 
+.menu-item{
+    position: relative;
+}
+.menu-item a{
+    color:#ffffff;
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-family: 'Tajawal', sans-serif;
+    position: relative;
+}
+.menu-item a:hover{
+    color:#fff !important;
+}
+
+.menu-item a:hover::before {
+    transform: scaleX(1);
+  }
+/* Animate the line from the left */
+.menu-item a::before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #fff;
+    transform: scaleX(0);
+    transform-origin: top left;
+    transition: transform 0.3s ease;
+  }
+  
+
+
+
+
+.main_menu_nav_wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: transparent;
+    z-index: 1000;
+    transition: top 0.5s, background-color 0.5s ease-in-out; /* Smooth transition for hiding and background color */
+}
+.main_menu_nav_wrapper.hidden {
+    top: -100px; /* Hide the navbar when scrolling down */
+}
+.main_menu_nav_wrapper.green-background {
+    background-color: #272b24; /* Green background when scrolling up */
+}
+.main_menu_nav_wrapper.transparent-background {
+    background-color: transparent !important; /* Transparent background when overlapping header */
+}
+
+
+
+.main_menu_nav_container {
+    display: flex;
+    height: 70px;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+.main_menu_logo {
+    height: 40px;
+}
+
+/* Navigation Menu */
+.main-nav .nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.main-nav .nav-menu li {
+    margin-right: 20px;
+}
+
+.main-nav .nav-menu li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+}
+
+.main-nav .nav-menu li a:hover {
+    color: #f1f1f1;
+}
+
+/* Style for Hamburger Menu */
+.hamburger-menu {
+    width: 35px;
+    height: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+    z-index: 1100;
+}
+
+.hamburger-menu .bar {
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Transform the bars into an 'X' when active */
+.hamburger-menu.active .bar:nth-child(1) {
+    transform: translateY(10px) rotate(45deg);
+}
+
+.hamburger-menu.active .bar:nth-child(2) {
+    opacity: 0; /* Hide the middle bar */
+}
+
+.hamburger-menu.active .bar:nth-child(3) {
+    transform: translateY(-10px) rotate(-45deg);
+}
+
+
+/* Mobile Menu */
+.mobile-menu-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: var(--secondary-bg-color);
+    width: 100%;
+    height: 100vh;
+    z-index: 999;
+}
+
+.mobile-menu-container nav {
+    margin-top: 100px;
+    text-align: center;
+}
+
+.mobile-menu-container .nav-menu {
+    flex-direction: column;
+    align-items: center;
+
+}
+.mobile-menu-container .nav-menu{
+    float:none;
+    margin-right: 50px;
+}
+
+.mobile-menu-container .nav-menu li {
+  margin-bottom: 20px;
+  display: block;
+  text-align: right;
+}
+.mobile-menu-container .nav-menu a{
+    font-size: 1.8rem;
+    font-weight: 100;
+
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .main-nav .nav-menu {
+        display: none;
+    }
+
+    .hamburger-menu {
+        display: flex;
+    }
+
+    .mobile-menu-container {
+        display: block;
+    }
+}
+  
+/* Mobile Menu Hidden by Default */
+#mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Initially off-screen */
+    width: 70%; /* Adjust width as needed */
+    height: 100vh;
+    
+    background-color: var(--secondary-bg-color);
+    opacity: 0.95;
+    transition: right 0.5s ease-in-out; /* Smooth sliding effect */
+    z-index: 1000;
+    padding-top: 50px;
+}
+
+/* Show Menu When Active */
+#mobile-menu.active {
+    right: 0; /* Slide in from the right */
+}
+
+/* Hamburger Icon Styling */
+#menu-toggle {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+
