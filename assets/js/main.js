@@ -11,6 +11,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// Initialize Masonry only for grids that specifically request it
+document.addEventListener('DOMContentLoaded', () => {
+    const masonryGrids = document.querySelectorAll('.portfolio-grid[data-display-mode="masonry"]');
+    
+    if (masonryGrids.length > 0) {
+        masonryGrids.forEach(grid => {
+            // Remove any existing inline styles that might interfere
+            grid.style.position = '';
+            grid.style.height = '';
+            
+            const items = grid.querySelectorAll('.portfolio-item');
+            items.forEach(item => {
+                item.style.position = '';
+                item.style.left = '';
+                item.style.top = '';
+            });
+
+            const masonry = new Masonry(grid, {
+                itemSelector: '.portfolio-item',
+                columnWidth: '.portfolio-item',
+                percentPosition: true,
+                transitionDuration: '0.2s'
+            });
+
+            // Layout Masonry after each image loads
+            imagesLoaded(grid).on('progress', () => {
+                masonry.layout();
+            });
+        });
+    }
+});
+
 // Mobile Menu Toggle
 
 
@@ -18,62 +50,91 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", function () {
     let lastScrollTop = 0;
     const navBar = document.querySelector(".main_menu_nav_wrapper");
-    const headerHeight = document.querySelector(".header-wrapper").offsetHeight || 500; // Fallback to 100 if header doesn't exist
+    const headerWrapper = document.querySelector(".header-wrapper");
+    const headerHeight = headerWrapper ? headerWrapper.offsetHeight : 500; // Fallback to 500 if header doesn't exist
     const threshold = 50; // When the background should turn green
 
-    window.addEventListener("scroll", function () {
-        let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    // Only add scroll listener if navbar exists
+    if (navBar) {
+        window.addEventListener("scroll", function () {
+            let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
 
-        // If scrolling down, hide navbar
-        if (currentScroll > lastScrollTop && currentScroll > headerHeight) {
-            navBar.classList.add("hidden"); // Hide menu
-        } 
-        // If scrolling up, show navbar
-        else {
-            navBar.classList.remove("hidden"); // Show menu
+            // If scrolling down, hide navbar
+            if (currentScroll > lastScrollTop && currentScroll > headerHeight) {
+                navBar.classList.add("hidden"); // Hide menu
+            } 
+            // If scrolling up, show navbar
+            else {
+                navBar.classList.remove("hidden"); // Show menu
 
-            // If the scroll position is beyond the threshold, add green background
-            if (currentScroll > threshold) {
-                navBar.classList.add("green-background");
-                navBar.classList.remove("transparent-background"); // Ensure it's not transparent
+                // If the scroll position is beyond the threshold, add green background
+                if (currentScroll > threshold) {
+                    navBar.classList.add("green-background");
+                    navBar.classList.remove("transparent-background"); // Ensure it's not transparent
+                }
             }
-        }
 
-        // If the menu overlaps the header, reset to transparent
-        if (currentScroll < headerHeight/2) {
-            navBar.classList.remove("green-background");
-            navBar.classList.add("transparent-background");
-        }
+            // If the menu overlaps the header, reset to transparent
+            if (currentScroll < headerHeight/2) {
+                navBar.classList.remove("green-background");
+                navBar.classList.add("transparent-background");
+            }
 
-        lastScrollTop = currentScroll;
-    });
+            lastScrollTop = currentScroll;
+        });
+    }
 });
-// Mobile menu slide out and hamburger animation
+// Handle menu links and anchor navigation
 document.addEventListener("DOMContentLoaded", function () {
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    const menuLinks = mobileMenu.querySelectorAll("a"); // Select all links inside the menu
+    const allMenuLinks = document.querySelectorAll('.main_menu_nav_wrapper a, #mobile-menu a'); // Select all menu links
+    const isHomePage = document.body.classList.contains('home');
+    const homeUrl = window.location.protocol + '//' + window.location.host + '/';
 
-    
-    menuToggle.addEventListener('click', function () {
-        this.classList.toggle('active'); // Animate bars
-        mobileMenu.classList.toggle('active'); // Slide menu
-    });
-
-    // Optional: Close menu when clicking outside
-    document.addEventListener('click', function (event) {
-        if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
-            mobileMenu.classList.remove('active');
-            menuToggle.classList.remove('active');
-        }
-    });
-    // Close menu when clicking a menu link
-    menuLinks.forEach(link => {
-        link.addEventListener('click', function () {
-            mobileMenu.classList.remove('active');
-            menuToggle.classList.remove('active');
+    // Handle all menu links
+    allMenuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // If it's an anchor link and we're not on the home page
+            if (href && href.startsWith('#') && !isHomePage) {
+                e.preventDefault();
+                window.location.href = homeUrl + href;
+                return;
+            }
+            
+            // If we're on the home page and it's an anchor link
+            if (href && href.startsWith('#') && isHomePage) {
+                e.preventDefault();
+                const targetElement = document.querySelector(href);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                    // Close mobile menu if open
+                    if (mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                        menuToggle.classList.remove('active');
+                    }
+                }
+            }
         });
     });
+
+    // Mobile menu toggle
+    if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', function () {
+            this.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+                mobileMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
+        });
+    }
 });
 
 // PAGE PRE LOADER

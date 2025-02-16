@@ -23,9 +23,140 @@ add_action('after_setup_theme', 'mytheme_theme_setup');
 function mytheme_enqueue_css() {
     wp_enqueue_style('menu-css', get_template_directory_uri() . '/assets/css/menu.css');
     wp_enqueue_style('custom-contact-form-7-css', get_template_directory_uri() . '/assets/css/cf7-custom.css');
-    
+    wp_enqueue_style('portfolio-css', get_template_directory_uri() . '/assets/css/portfolio.css');
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+
+    // Only enqueue portfolio-related scripts on portfolio and single project pages
+    if (is_page_template('page-templates/template-portfolio.php') || is_singular('project_gallery')) {
+        wp_enqueue_script('auto-scroll', get_template_directory_uri() . '/assets/js/auto-scroll.js', array(), false, true);
+        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', array('jquery'), null, true);
+        wp_enqueue_script('portfolio-filter', get_template_directory_uri() . '/assets/js/portfolio-filter.js', array('jquery', 'select2'), null, true);
+        
+        // Add AJAX variables
+        wp_localize_script('portfolio-filter', 'portfolio_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('portfolio_filter_nonce')
+        ));
+    }
 }
+
+// AJAX handler for portfolio filtering
+function filter_portfolio() {
+    check_ajax_referer('portfolio_filter_nonce', 'nonce');
+
+    $search = sanitize_text_field($_POST['search'] ?? '');
+    $tags = array_map('sanitize_text_field', $_POST['tags'] ?? array());
+    $sort = sanitize_text_field($_POST['sort'] ?? 'date-desc');
+    $mode = sanitize_text_field($_POST['mode'] ?? 'projects');
+
+    $args = array(
+        'post_type' => 'project_gallery',
+        'posts_per_page' => -1,
+        'orderby' => 'date',
+        'order' => 'DESC'
+    );
+
+    // Search
+    if (!empty($search)) {
+        $args['s'] = $search;
+    }
+
+    // Tags
+    if (!empty($tags)) {
+        $args['tax_query'] = array(
+            array(
+                'taxonomy' => 'project_tag',
+                'field' => 'slug',
+                'terms' => $tags
+            )
+        );
+    }
+
+    // Sorting
+    switch ($sort) {
+        case 'date-asc':
+            $args['order'] = 'ASC';
+            break;
+        case 'title-asc':
+            $args['orderby'] = 'title';
+            $args['order'] = 'ASC';
+            break;
+        case 'title-desc':
+            $args['orderby'] = 'title';
+            $args['order'] = 'DESC';
+            break;
+    }
+
+    $query = new WP_Query($args);
+    ob_start();
+
+    if ($mode === 'content') {
+        // Content mode: show individual gallery items
+        while ($query->have_posts()) : $query->the_post();
+            $gallery_items = get_field('gallery_items');
+            if ($gallery_items) {
+                foreach ($gallery_items as $item) {
+                    echo '<div class="portfolio-item content-item">';
+                    if ($item['type'] === 'image') {
+                        echo '<img src="' . esc_url($item['image']['url']) . '" alt="' . esc_attr($item['image']['alt']) . '">';
+                    } elseif ($item['type'] === 'video') {
+                        echo '<video src="' . esc_url($item['video']['url']) . '" controls></video>';
+                    }
+                    echo '<div class="item-overlay">';
+                    echo '<h3>' . esc_html(get_the_title()) . '</h3>';
+                    if (!empty($item['description'])) {
+                        echo '<p>' . esc_html($item['description']) . '</p>';
+                    }
+                    echo '</div></div>';
+                }
+            }
+        endwhile;
+    } else {
+        // Projects mode: show project thumbnails
+        while ($query->have_posts()) : $query->the_post();
+            get_template_part('template-parts/content', 'project');
+        endwhile;
+    }
+
+    wp_reset_postdata();
+    $html = ob_get_clean();
+
+    wp_send_json_success(array('html' => $html));
+}
+add_action('wp_ajax_filter_portfolio', 'filter_portfolio');
+add_action('wp_ajax_nopriv_filter_portfolio', 'filter_portfolio');
 add_action('wp_enqueue_scripts', 'mytheme_enqueue_css');
+
+// Debug template loading
+function debug_template_selection($template) {
+    if (is_singular('project_gallery')) {
+        error_log('Selected template for project gallery: ' . $template);
+    }
+    if (is_post_type_archive('project_gallery')) {
+        error_log('Selected template for project gallery archive: ' . $template);
+    }
+    return $template;
+}
+add_filter('template_include', 'debug_template_selection');
+
+// Force single project gallery template
+function force_project_gallery_template($template) {
+    if (is_singular('project_gallery')) {
+        $new_template = locate_template(array('single-project_gallery.php'));
+        if ($new_template) {
+            return $new_template;
+        }
+    }
+    if (is_post_type_archive('project_gallery')) {
+        $new_template = locate_template(array('archive-project_gallery.php'));
+        if ($new_template) {
+            return $new_template;
+        }
+    }
+    return $template;
+}
+add_filter('single_template', 'force_project_gallery_template');
 
 // Enqueue Styles and Scripts
 function mytheme_enqueue_scripts() {
@@ -33,8 +164,12 @@ function mytheme_enqueue_scripts() {
     wp_enqueue_script('fade-in-script', get_template_directory_uri() . '/assets/js/section-observer-fade-in.js', array(), false, true);
     wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js');
 
-    // Gallery scripts
+    // Gallery scripts and styles
     if (is_post_type_archive('project_gallery') || is_singular('project_gallery') || is_page_template('templates/portfolio.php')) {
+        // Enqueue portfolio styles
+        wp_enqueue_style('portfolio-css', get_template_directory_uri() . '/assets/css/portfolio.css');
+        
+        // Enqueue gallery scripts
         wp_enqueue_script('masonry');
         wp_enqueue_script('imagesloaded');
         wp_enqueue_script('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js', array(), '3.2.0', true);
@@ -1431,5 +1566,16 @@ function get_tag_suggestions() {
     wp_send_json_success($suggestions);
 }
 add_action('wp_ajax_get_tag_suggestions', 'get_tag_suggestions');
+
+/**
+ * Ensure correct post type is queried on portfolio archive
+ */
+function modify_project_gallery_archive_query($query) {
+    if (!is_admin() && $query->is_main_query() && is_post_type_archive('project_gallery')) {
+        $query->set('post_type', 'project_gallery');
+        $query->set('posts_per_page', 12); // Adjust this number as needed
+    }
+}
+add_action('pre_get_posts', 'modify_project_gallery_archive_query');
 
 ?>

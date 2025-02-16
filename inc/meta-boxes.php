@@ -19,6 +19,15 @@ function register_project_gallery_meta_boxes() {
         'normal',
         'high'
     );
+
+    add_meta_box(
+        'project_gallery_display_mode',
+        __('Gallery Display Mode', 'filmestate'),
+        'render_project_gallery_display_mode_box',
+        'project_gallery',
+        'side',
+        'high'
+    );
 }
 
 /**
@@ -214,3 +223,66 @@ function save_project_gallery_meta($post_id) {
     }
 }
 add_action('save_post_project_gallery', 'save_project_gallery_meta');
+
+/**
+ * Render the display mode meta box
+ */
+function render_project_gallery_display_mode_box($post) {
+    wp_nonce_field('project_gallery_display_mode_nonce', 'project_gallery_display_mode_nonce');
+    $display_mode = get_post_meta($post->ID, '_project_gallery_display_mode', true) ?: 'square';
+    ?>
+    <div class="display-mode-selector">
+        <p><strong><?php _e('Select how the gallery should be displayed:', 'filmestate'); ?></strong></p>
+        <label>
+            <input type="radio" name="project_gallery_display_mode" value="square" <?php checked($display_mode, 'square'); ?>>
+            <i class="fas fa-th"></i> <?php _e('Square Grid', 'filmestate'); ?>
+        </label><br>
+        <label>
+            <input type="radio" name="project_gallery_display_mode" value="full" <?php checked($display_mode, 'full'); ?>>
+            <i class="fas fa-bars"></i> <?php _e('Full Width', 'filmestate'); ?>
+        </label><br>
+        <label>
+            <input type="radio" name="project_gallery_display_mode" value="masonry" <?php checked($display_mode, 'masonry'); ?>>
+            <i class="fas fa-th-large"></i> <?php _e('Masonry Grid', 'filmestate'); ?>
+        </label>
+    </div>
+    <style>
+        .display-mode-selector label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        .display-mode-selector i {
+            width: 20px;
+            color: #666;
+        }
+    </style>
+    <?php
+}
+
+/**
+ * Save the display mode meta box data
+ */
+function save_project_gallery_display_mode($post_id) {
+    if (!isset($_POST['project_gallery_display_mode_nonce']) ||
+        !wp_verify_nonce($_POST['project_gallery_display_mode_nonce'], 'project_gallery_display_mode_nonce')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    if (isset($_POST['project_gallery_display_mode'])) {
+        update_post_meta(
+            $post_id,
+            '_project_gallery_display_mode',
+            sanitize_text_field($_POST['project_gallery_display_mode'])
+        );
+    }
+}
+add_action('save_post_project_gallery', 'save_project_gallery_display_mode');

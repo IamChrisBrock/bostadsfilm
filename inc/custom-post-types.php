@@ -38,7 +38,7 @@ function register_project_gallery_post_type() {
         'show_ui'           => true,
         'show_in_menu'      => true,
         'query_var'         => true,
-        'rewrite'           => array('slug' => 'project-gallery'),
+        'rewrite'           => array('slug' => 'project'),
         'capability_type'   => 'post',
         'has_archive'       => true,
         'hierarchical'      => false,
