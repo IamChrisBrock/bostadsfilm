@@ -73,7 +73,7 @@ function mytheme_enqueue_scripts() {
     wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js');
 
     // Gallery scripts and styles
-    if (is_post_type_archive('project_gallery') || is_singular('project_gallery') || is_page_template('templates/portfolio.php')) {
+    if (is_post_type_archive('project_gallery') || is_singular('project_gallery')) {
         // Enqueue portfolio styles
         wp_enqueue_style('portfolio-css', get_template_directory_uri() . '/assets/css/portfolio.css');
         
