@@ -13,8 +13,7 @@ if (!defined('ABSPATH')) {
 function project_gallery_shortcode($atts) {
     $atts = shortcode_atts(array(
         'id' => 0,
-        'columns' => 3,
-        'show_filters' => 'true'
+        'columns' => 3
     ), $atts);
 
     ob_start();
@@ -33,18 +32,7 @@ function project_gallery_shortcode($atts) {
 
     $media_ids = explode(',', $media_ids);
 
-    // Show filters if enabled
-    if ($atts['show_filters'] === 'true') {
-        $tags = wp_get_post_terms($project->ID, 'project_tags');
-        if (!empty($tags) && !is_wp_error($tags)) {
-            echo '<div class="portfolio-filters">';
-            echo '<button class="filter-btn active" data-filter="all">' . __('All', 'filmestate') . '</button>';
-            foreach ($tags as $tag) {
-                echo '<button class="filter-btn" data-filter="' . esc_attr($tag->slug) . '">' . esc_html($tag->name) . '</button>';
-            }
-            echo '</div>';
-        }
-    }
+
 
     // Display gallery
     echo '<div class="portfolio-grid columns-' . esc_attr($atts['columns']) . '">';

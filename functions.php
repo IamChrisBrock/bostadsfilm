@@ -30,102 +30,10 @@ function mytheme_enqueue_css() {
     // Only enqueue portfolio-related scripts on portfolio and single project pages
     if (is_page_template('page-templates/template-portfolio.php') || is_singular('project_gallery')) {
         wp_enqueue_script('auto-scroll', get_template_directory_uri() . '/assets/js/auto-scroll.js', array(), false, true);
-        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', array('jquery'), null, true);
-        wp_enqueue_script('portfolio-filter', get_template_directory_uri() . '/assets/js/portfolio-filter.js', array('jquery', 'select2'), null, true);
-        
-        // Add AJAX variables
-        wp_localize_script('portfolio-filter', 'portfolio_ajax', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('portfolio_filter_nonce')
-        ));
     }
 }
 
-// AJAX handler for portfolio filtering
-function filter_portfolio() {
-    check_ajax_referer('portfolio_filter_nonce', 'nonce');
 
-    $search = sanitize_text_field($_POST['search'] ?? '');
-    $tags = array_map('sanitize_text_field', $_POST['tags'] ?? array());
-    $sort = sanitize_text_field($_POST['sort'] ?? 'date-desc');
-    $mode = sanitize_text_field($_POST['mode'] ?? 'projects');
-
-    $args = array(
-        'post_type' => 'project_gallery',
-        'posts_per_page' => -1,
-        'orderby' => 'date',
-        'order' => 'DESC'
-    );
-
-    // Search
-    if (!empty($search)) {
-        $args['s'] = $search;
-    }
-
-    // Tags
-    if (!empty($tags)) {
-        $args['tax_query'] = array(
-            array(
-                'taxonomy' => 'project_tag',
-                'field' => 'slug',
-                'terms' => $tags
-            )
-        );
-    }
-
-    // Sorting
-    switch ($sort) {
-        case 'date-asc':
-            $args['order'] = 'ASC';
-            break;
-        case 'title-asc':
-            $args['orderby'] = 'title';
-            $args['order'] = 'ASC';
-            break;
-        case 'title-desc':
-            $args['orderby'] = 'title';
-            $args['order'] = 'DESC';
-            break;
-    }
-
-    $query = new WP_Query($args);
-    ob_start();
-
-    if ($mode === 'content') {
-        // Content mode: show individual gallery items
-        while ($query->have_posts()) : $query->the_post();
-            $gallery_items = get_field('gallery_items');
-            if ($gallery_items) {
-                foreach ($gallery_items as $item) {
-                    echo '<div class="portfolio-item content-item">';
-                    if ($item['type'] === 'image') {
-                        echo '<img src="' . esc_url($item['image']['url']) . '" alt="' . esc_attr($item['image']['alt']) . '">';
-                    } elseif ($item['type'] === 'video') {
-                        echo '<video src="' . esc_url($item['video']['url']) . '" controls></video>';
-                    }
-                    echo '<div class="item-overlay">';
-                    echo '<h3>' . esc_html(get_the_title()) . '</h3>';
-                    if (!empty($item['description'])) {
-                        echo '<p>' . esc_html($item['description']) . '</p>';
-                    }
-                    echo '</div></div>';
-                }
-            }
-        endwhile;
-    } else {
-        // Projects mode: show project thumbnails
-        while ($query->have_posts()) : $query->the_post();
-            get_template_part('template-parts/content', 'project');
-        endwhile;
-    }
-
-    wp_reset_postdata();
-    $html = ob_get_clean();
-
-    wp_send_json_success(array('html' => $html));
-}
-add_action('wp_ajax_filter_portfolio', 'filter_portfolio');
-add_action('wp_ajax_nopriv_filter_portfolio', 'filter_portfolio');
 add_action('wp_enqueue_scripts', 'mytheme_enqueue_css');
 
 // Debug template loading

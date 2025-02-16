@@ -42,42 +42,8 @@ $project_query = new WP_Query($args);
 
 <div id="portfolio-content" class="portfolio-archive">
     <div class="container">
-        <div class="portfolio-filters">
-            <div class="filter-group search-group">
-                <input type="text" id="portfolio-search" placeholder="Search..." class="search-input">
-            </div>
 
-            <div class="filter-group tag-group">
-                <select id="tag-filter" class="filter-select" multiple="multiple">
-                    <?php
-                    $tags = get_terms(array(
-                        'taxonomy' => 'project_tag',
-                        'hide_empty' => true
-                    ));
-                    foreach ($tags as $tag) {
-                        echo '<option value="' . esc_attr($tag->slug) . '">' . esc_html($tag->name) . '</option>';
-                    }
-                    ?>
-                </select>
-            </div>
 
-            <div class="filter-group sort-group">
-                <select id="sort-filter" class="filter-select">
-                    <option value="date-desc">Newest First</option>
-                    <option value="date-asc">Oldest First</option>
-                    <option value="title-asc">A-Z</option>
-                    <option value="title-desc">Z-A</option>
-                </select>
-            </div>
-
-            <div class="filter-group view-switch">
-                <label class="switch">
-                    <input type="checkbox" id="view-mode-switch">
-                    <span class="slider round"></span>
-                    <span class="switch-label">Projects</span>
-                </label>
-            </div>
-        </div>
 
         <div class="portfolio-grid" data-display-mode="grid" id="portfolio-items">
             <?php

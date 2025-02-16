@@ -9,25 +9,7 @@ get_header();
 <div class="portfolio-gallery">
     <div class="container">
         <?php
-        // Get all project tags
-        $tags = get_terms(array(
-            'taxonomy' => 'project_tags',
-            'hide_empty' => true,
-        ));
 
-        if (!empty($tags) && !is_wp_error($tags)) {
-            ?>
-            <div class="portfolio-filters">
-                <button class="filter-btn active" data-filter="all"><?php _e('All', 'filmestate'); ?></button>
-                <?php
-                foreach ($tags as $tag) {
-                    echo '<button class="filter-btn" data-filter="' . esc_attr($tag->slug) . '">' . esc_html($tag->name) . '</button>';
-                }
-                ?>
-            </div>
-            <?php
-        }
-        ?>
 
         <?php
         // Get all project galleries
