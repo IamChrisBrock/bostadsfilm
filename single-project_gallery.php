@@ -39,22 +39,33 @@ get_header();
                     // Get media type and URL
                     $type = wp_attachment_is('video', $media_id) ? 'video' : 'image';
                     $url = wp_get_attachment_url($media_id);
-                    $thumbnail = $type === 'video' ? 
-                        wp_get_attachment_image_src(get_post_thumbnail_id($media_id), 'large') : 
-                        wp_get_attachment_image_src($media_id, 'large');
                     
-                    ?>
-                    <div class="portfolio-item" data-type="<?php echo esc_attr($type); ?>">
-                        <a href="<?php echo esc_url($url); ?>" class="glightbox" data-gallery="single-project">
-                            <img src="<?php echo esc_url($thumbnail[0]); ?>" alt="<?php echo esc_attr(get_the_title($media_id)); ?>">
-                            <?php if ($type === 'video'): ?>
-                                <span class="video-overlay">
-                                    <i class="fas fa-play"></i>
-                                </span>
-                            <?php endif; ?>
-                        </a>
-                    </div>
-                    <?php
+                    if ($type === 'video') {
+                        // For videos, display the video player directly
+                        ?>
+                        <div class="portfolio-item video-item" data-type="video">
+                            <video controls preload="metadata" playsinline>
+                                <source src="<?php echo esc_url($url); ?>" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <!-- Hidden link for lightbox gallery -->
+                            <a href="<?php echo esc_url($url); ?>" class="glightbox hidden" data-type="video" data-gallery="single-project"></a>
+                        </div>
+                        <?php
+                    } else {
+                        // For images, keep the lightbox behavior
+                        $thumbnail = wp_get_attachment_image_src($media_id, 'large');
+                        if ($thumbnail) {
+                            ?>
+                            <div class="portfolio-item" data-type="image">
+                                <a href="<?php echo esc_url($url); ?>" class="glightbox" data-gallery="single-project">
+                                    <img src="<?php echo esc_url($thumbnail[0]); ?>" alt="<?php echo esc_attr(get_the_title($media_id)); ?>">
+                                </a>
+                            </div>
+                            <?php
+                        }
+                    }
+                   
                 }
                 ?>
             </div>

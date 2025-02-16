@@ -17,7 +17,15 @@ get_header();
 
 <div class="portfolio-archive">
     <div class="container">
-        <div class="portfolio-grid" data-display-mode="grid">
+        <div class="view-switch">
+            <label class="switch">
+                <input type="checkbox" id="view-mode-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span class="switch-label">Projects</span>
+        </div>
+
+        <div class="portfolio-grid" data-display-mode="grid" id="portfolio-items">
             <?php
             if (have_posts()) :
                 while (have_posts()) : the_post();

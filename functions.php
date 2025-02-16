@@ -27,14 +27,169 @@ function mytheme_enqueue_css() {
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
 
-    // Only enqueue portfolio-related scripts on portfolio and single project pages
-    if (is_page_template('page-templates/template-portfolio.php') || is_singular('project_gallery')) {
+    // Enqueue portfolio-related scripts
+    if (is_post_type_archive('project_gallery') || is_singular('project_gallery') || is_page_template('page-templates/template-portfolio.php')) {
         wp_enqueue_script('auto-scroll', get_template_directory_uri() . '/assets/js/auto-scroll.js', array(), false, true);
+        
+        // Load view toggle on archive and portfolio template pages
+        if (is_post_type_archive('project_gallery') || is_page_template('page-templates/template-portfolio.php')) {
+            wp_enqueue_script('portfolio-view', get_template_directory_uri() . '/assets/js/portfolio-view.js', array('jquery'), null, true);
+            
+            // Add AJAX variables
+            wp_localize_script('portfolio-view', 'portfolio_ajax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('portfolio_view_nonce')
+            ));
+        }
     }
 }
 
 
 add_action('wp_enqueue_scripts', 'mytheme_enqueue_css');
+
+// AJAX handler for portfolio view toggle
+function toggle_portfolio_view() {
+    check_ajax_referer('portfolio_view_nonce', 'nonce');
+
+    $view = sanitize_text_field($_POST['view'] ?? 'projects');
+    $output = '';
+
+    if ($view === 'media') {
+        // Get all project galleries
+        $projects = get_posts(array(
+            'post_type' => 'project_gallery',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+
+        // Start with display mode controls
+        $output .= '<div class="display-mode-controls">';
+        $output .= '<button type="button" class="display-mode-btn active" data-mode="square"><i class="fas fa-th"></i></button>';
+        $output .= '<button type="button" class="display-mode-btn" data-mode="vertical"><i class="fas fa-th-large"></i></button>';
+        $output .= '<button type="button" class="display-mode-btn" data-mode="horizontal"><i class="fas fa-film"></i></button>';
+        $output .= '</div>';
+
+        // Start portfolio grid with default square mode
+        $output .= '<div class="portfolio-grid" data-display-mode="square">';
+
+        // Collect all media from all projects
+        foreach ($projects as $project) {
+            $media_ids = get_post_meta($project->ID, '_project_gallery_media', true);
+            if ($media_ids) {
+                $media_ids = explode(',', $media_ids);
+                foreach ($media_ids as $media_id) {
+                    // Get media type and URL
+                    $type = wp_attachment_is('video', $media_id) ? 'video' : 'image';
+                    $url = wp_get_attachment_url($media_id);
+                    $thumbnail = $type === 'video' ? 
+                        wp_get_attachment_image_src(get_post_thumbnail_id($media_id), 'large') : 
+                        wp_get_attachment_image_src($media_id, 'large');
+                    
+                    if ($thumbnail) {
+                        $output .= '<div class="portfolio-item" data-type="' . esc_attr($type) . '">';
+                        $output .= '<a href="' . esc_url($url) . '" class="glightbox" ' .
+                                  ($type === 'video' ? 'data-type="video" ' : '') .
+                                  'data-gallery="portfolio-media">';
+                        $output .= '<img src="' . esc_url($thumbnail[0]) . '" alt="' . esc_attr(get_the_title($media_id)) . '">';
+                        if ($type === 'video') {
+                            $output .= '<span class="video-overlay"><i class="fas fa-play"></i></span>';
+                        }
+                        $output .= '</a>';
+                        $output .= '</div>';
+                    }
+                }
+            }
+        }
+        
+        // Close portfolio grid
+        $output .= '</div>';
+
+        // Add JavaScript for display mode switching
+        $output .= "<script>
+            jQuery(document).ready(function($) {
+                $('.display-mode-btn').on('click', function() {
+                    $('.display-mode-btn').removeClass('active');
+                    $(this).addClass('active');
+                    var mode = $(this).data('mode');
+                    $('.portfolio-grid').attr('data-display-mode', mode);
+                });
+            });
+        </script>";
+
+    } else {
+        // Projects view - show project thumbnails
+        $query = new WP_Query(array(
+            'post_type' => 'project_gallery',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $post_id = get_the_ID();
+                $title = get_the_title();
+                $permalink = get_permalink();
+                $excerpt = has_excerpt() ? wp_strip_all_tags(get_the_excerpt()) : '';
+                
+                // Get the first media item as preview
+                $media_ids = get_post_meta($post_id, '_project_gallery_media', true);
+                $preview_image = '';
+                
+                if ($media_ids) {
+                    $media_ids = explode(',', $media_ids);
+                    $first_media = $media_ids[0];
+                    
+                    // Check if it's a video
+                    if (wp_attachment_is('video', $first_media)) {
+                        // If video, try to get its thumbnail
+                        $preview_image = get_post_thumbnail_id($first_media);
+                        if (!$preview_image) {
+                            // If no video thumbnail, use post thumbnail
+                            $preview_image = get_post_thumbnail_id($post_id);
+                        }
+                    } else {
+                        // If image, use it directly
+                        $preview_image = $first_media;
+                    }
+                } else {
+                    // Fallback to post thumbnail
+                    $preview_image = get_post_thumbnail_id($post_id);
+                }
+                
+                // Get image URL
+                $image_url = wp_get_attachment_image_src($preview_image, 'large');
+                
+                if ($image_url) {
+                    $output .= '<article class="portfolio-item">';
+                    $output .= '<a href="' . esc_url($permalink) . '" class="portfolio-item-link">';
+                    $output .= '<div class="portfolio-item-image">';
+                    $output .= '<img src="' . esc_url($image_url[0]) . '" alt="' . esc_attr($title) . '" loading="lazy">';
+                    $output .= '</div>';
+                    $output .= '<div class="portfolio-item-overlay">';
+                    $output .= '<div class="portfolio-item-content">';
+                    $output .= '<h2>' . esc_html($title) . '</h2>';
+                    if ($excerpt) {
+                        $output .= '<div class="portfolio-item-excerpt">' . esc_html($excerpt) . '</div>';
+                    }
+                    $output .= '</div>';
+                    $output .= '</div>';
+                    $output .= '</a>';
+                    $output .= '</article>';
+                }
+            }
+        }
+        wp_reset_postdata();
+    }
+    
+    wp_send_json_success(array('html' => $output));
+    die();
+}
+
+add_action('wp_ajax_toggle_portfolio_view', 'toggle_portfolio_view');
+add_action('wp_ajax_nopriv_toggle_portfolio_view', 'toggle_portfolio_view');
 
 // Debug template loading
 function debug_template_selection($template) {
