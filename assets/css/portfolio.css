@@ -69,6 +69,11 @@ input:checked + .slider:before {
 }
 
 /* Loading State */
+.portfolio-projects-grid.loading{
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
 .portfolio-grid.loading {
     opacity: 0.5;
     pointer-events: none;
@@ -118,43 +123,21 @@ input:checked + .slider:before {
 }
 
 /* Portfolio Grid Styles */
-.portfolio-grid {
-    width: 100%;
-    margin: 0 auto;
-    display: grid;
-    gap: 1rem;
-    transition: all 0.3s ease;
+.portfolio-grid.full-width-mode {
+    --bs-gutter-x: 0;
+    --bs-gutter-y: 5px;
 }
 
-/* Square Grid Mode */
-.portfolio-grid[data-display-mode="square"] {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+.portfolio-grid.full-width-mode > * {
+    margin-top: 0;
+    padding-top: var(--bs-gutter-y);
 }
 
-/* Vertical Grid Mode */
-.portfolio-grid[data-display-mode="vertical"] {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+/* Adjust gap for non-full-width modes */
+.container .portfolio-grid {
+    
 }
 
-/* Horizontal Grid Mode */
-.portfolio-grid[data-display-mode="horizontal"] {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.portfolio-grid[data-display-mode="horizontal"] .portfolio-item {
-    max-height: 70vh;
-    overflow: hidden;
-}
-
-.portfolio-grid[data-display-mode="horizontal"] .portfolio-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 /* Video Player Styles */
 .portfolio-item.video-item {
@@ -187,17 +170,6 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-/* Ensure videos maintain aspect ratio in grid */
-.portfolio-grid[data-display-mode="square"] .portfolio-item.video-item,
-.portfolio-grid[data-display-mode="vertical"] .portfolio-item.video-item {
-    aspect-ratio: 16/9;
-    width: 100%;
-}
-
-.portfolio-grid[data-display-mode="horizontal"] .portfolio-item.video-item {
-    max-height: none;
-    aspect-ratio: 16/9;
-}
 
 /* GLightbox video customization */
 .glightbox-container .gvideo {
@@ -211,66 +183,13 @@ input:checked + .slider:before {
     height: 100%;
     object-fit: contain;
 }
-}
 
-@media (max-width: 768px) {
-    .portfolio-grid[data-display-mode="vertical"] {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-}
 
-.portfolio-grid[data-display-mode="square"] .portfolio-item {
-    aspect-ratio: 1;
-    overflow: hidden;
-}
 
-.portfolio-grid[data-display-mode="square"] img,
-.portfolio-grid[data-display-mode="square"] video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
-/* Full Width Mode */
-.portfolio-grid[data-display-mode="full"] {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
 
-.portfolio-grid[data-display-mode="full"] .portfolio-item {
-    width: 100%;
-}
 
-.portfolio-grid[data-display-mode="full"] img,
-.portfolio-grid[data-display-mode="full"] video {
-    width: 100%;
-    height: auto;
-}
 
-/* Masonry Mode */
-.portfolio-grid[data-display-mode="masonry"] {
-    margin: 0 -0.5rem;
-}
-
-.portfolio-grid[data-display-mode="masonry"] .portfolio-item {
-    width: calc(33.333% - 1rem);
-    margin: 0.5rem;
-}
-
-.portfolio-grid[data-display-mode="masonry"] img,
-.portfolio-grid[data-display-mode="masonry"] video {
-    width: 100%;
-    height: auto;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .portfolio-grid[data-display-mode="masonry"] .portfolio-item {
-        width: calc(50% - 1rem);
-    }
-}
 
 /* Portfolio Archive Styles */
 .portfolio-header-wrapper {
@@ -286,8 +205,10 @@ input:checked + .slider:before {
     margin-bottom: 1rem;
     color: #333;
 }
-
-.portfolio-archive .portfolio-grid {
+.portfolio-archive{
+    min-height:100vh;
+}
+.portfolio-archive .portfolio-projects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 2rem;
@@ -384,7 +305,7 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 768px) {
-    .portfolio-archive .portfolio-grid {
+    .portfolio-archive .portfolio-projects-grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
     }
@@ -433,9 +354,7 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 480px) {
-    .portfolio-grid[data-display-mode="masonry"] .portfolio-item {
-        width: calc(100% - 1rem);
-    }
+
     
     .portfolio-controls {
         flex-direction: column;
@@ -449,4 +368,19 @@ input:checked + .slider:before {
     .single-project-gallery {
         padding: 2rem 0;
     }
+}
+.portfolio-projects-description{
+margin-top:10px;
+padding-right:50px;
+}
+.portfolio-projects-description h2{
+    color:var(--primary-link-color);
+    font-size: 1rem;
+    font-family: 'Made Tommy Regular', sans-serif;
+    
+}
+.portfolio-projects-description span{
+    color: #999;
+    font-size: 0.8rem;
+    font-family: 'Made Tommy Light', sans-serif;
 }

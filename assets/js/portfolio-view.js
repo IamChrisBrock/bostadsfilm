@@ -15,47 +15,44 @@ jQuery(document).ready(function($) {
     }
     
     function updateView(isMediaView) {
-        // Update label and grid mode
+        // Immediately update label and URL
         $switchLabel.text(isMediaView ? 'Media' : 'Projects');
-        $portfolioGrid.attr('data-display-mode', isMediaView ? 'media' : 'grid');
+        const url = new URL(window.location);
+        url.searchParams.set('view', isMediaView ? 'media' : 'projects');
+        window.history.pushState({}, '', url);
         
-        // Show loading state with fade effect
-        $portfolioItems.fadeOut(300, function() {
-            $portfolioItems.addClass('loading');
-            
-            // Make AJAX call to get content
-            $.ajax({
-                url: portfolio_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'toggle_portfolio_view',
-                    nonce: portfolio_ajax.nonce,
-                    view: isMediaView ? 'media' : 'projects'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $portfolioItems.html(response.data.html);
-                        
-                        // Reinitialize GLightbox for new media items
-                        if (lightbox) {
-                            lightbox.destroy();
-                            lightbox = GLightbox({
-                                selector: '.glightbox',
-                                touchNavigation: true,
-                                loop: true
-                            });
-                        }
-                        
-                        // Save view state in URL without page reload
-                        const url = new URL(window.location);
-                        url.searchParams.set('view', isMediaView ? 'media' : 'projects');
-                        window.history.pushState({}, '', url);
+        // Show loading state immediately
+        $portfolioItems.addClass('loading');
+        
+        // Make AJAX call to get content
+        $.ajax({
+            url: portfolio_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'toggle_portfolio_view',
+                nonce: portfolio_ajax.nonce,
+                view: isMediaView ? 'media' : 'projects'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update content
+                    $portfolioItems.html(response.data.html);
+                    
+                    // Only reinitialize GLightbox if switching to media view
+                    if (isMediaView && lightbox) {
+                        lightbox.destroy();
+                        lightbox = GLightbox({
+                            selector: '.glightbox',
+                            touchNavigation: true,
+                            loop: true
+                        });
                     }
-                },
-                complete: function() {
-                    $portfolioItems.removeClass('loading').fadeIn(300);
                 }
-            });
+            },
+            complete: function() {
+                // Remove loading state
+                $portfolioItems.removeClass('loading');
+            }
         });
     }
     

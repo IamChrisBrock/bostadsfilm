@@ -21,12 +21,13 @@ get_header();
     </div>
 </div>
 
+<div class="container">
 <?php 
 // This is required for Elementor
 the_content();
 
 endwhile; ?>
-
+</div>
 <?php
 
 // Query for project galleries
@@ -39,7 +40,6 @@ $args = array(
 
 $project_query = new WP_Query($args);
 ?>
-
 <div id="portfolio-content" class="portfolio-archive">
     <div class="container">
         <div class="view-switch">
@@ -50,7 +50,7 @@ $project_query = new WP_Query($args);
             <span class="switch-label">Projects</span>
         </div>
 
-        <div class="portfolio-grid" data-display-mode="grid" id="portfolio-items">
+        <div class="portfolio-projects-grid" id="portfolio-items">
             <?php
             if ($project_query->have_posts()) :
                 while ($project_query->have_posts()) : $project_query->the_post();
@@ -83,7 +83,7 @@ $project_query = new WP_Query($args);
                     $image_url = wp_get_attachment_image_src($preview_image, 'large');
                     $image_url = $image_url ? $image_url[0] : '';
                     ?>
-                    
+                    <div class="article-wrapper">
                     <article class="portfolio-item">
                         <a href="<?php the_permalink(); ?>" class="portfolio-item-link">
                             <div class="portfolio-item-image">
@@ -103,6 +103,12 @@ $project_query = new WP_Query($args);
                             </div>
                         </a>
                     </article>
+                    <div class="portfolio-projects-description">
+                        <h2><?php the_title(); ?></h2>
+                        <span><?php the_excerpt(); ?></span>
+                        </div>
+                    </div>
+                    
                     
                 <?php
                 endwhile;

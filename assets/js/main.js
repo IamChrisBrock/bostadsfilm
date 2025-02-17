@@ -11,37 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Initialize Masonry only for grids that specifically request it
-document.addEventListener('DOMContentLoaded', () => {
-    const masonryGrids = document.querySelectorAll('.portfolio-grid[data-display-mode="masonry"]');
-    
-    if (masonryGrids.length > 0) {
-        masonryGrids.forEach(grid => {
-            // Remove any existing inline styles that might interfere
-            grid.style.position = '';
-            grid.style.height = '';
-            
-            const items = grid.querySelectorAll('.portfolio-item');
-            items.forEach(item => {
-                item.style.position = '';
-                item.style.left = '';
-                item.style.top = '';
-            });
 
-            const masonry = new Masonry(grid, {
-                itemSelector: '.portfolio-item',
-                columnWidth: '.portfolio-item',
-                percentPosition: true,
-                transitionDuration: '0.2s'
-            });
-
-            // Layout Masonry after each image loads
-            imagesLoaded(grid).on('progress', () => {
-                masonry.layout();
-            });
-        });
-    }
-});
 
 // Mobile Menu Toggle
 
