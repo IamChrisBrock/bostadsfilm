@@ -254,6 +254,135 @@ function mytheme_register_menus() {
     ));
 }
 
+// Add menu style meta box
+function add_menu_style_meta_box() {
+    // Add to pages
+    add_meta_box(
+        'menu_style_meta_box',
+        'Menu Style',
+        'render_menu_style_meta_box',
+        'page',
+        'side',
+        'high'
+    );
+
+    // Add to project gallery
+    add_meta_box(
+        'menu_style_meta_box',
+        'Menu Style',
+        'render_menu_style_meta_box',
+        'project_gallery',
+        'side',
+        'high'
+    );
+
+    // Debug which post types have the meta box
+    add_action('wp_footer', function() {
+        $screen = get_current_screen();
+        if ($screen) {
+            echo "<!-- Current Screen ID: {$screen->id} -->";
+        }
+    });
+}
+add_action('add_meta_boxes', 'add_menu_style_meta_box');
+
+// Render menu style meta box
+function render_menu_style_meta_box($post) {
+    // Add nonce for security
+    wp_nonce_field('menu_style_meta_box', 'menu_style_meta_box_nonce');
+
+    // Get current value and add debug comment
+    $menu_style = get_post_meta($post->ID, '_menu_style', true);
+    echo '<!-- Current menu style: ' . esc_html($menu_style) . ' -->';
+
+    // Set default to white if not set
+    if (empty($menu_style)) {
+        $menu_style = 'white';
+    }
+    ?>
+    <p>
+        <label for="menu_style">Menu Text Color:</label><br>
+        <select name="menu_style" id="menu_style">
+            <option value="white" <?php selected($menu_style, 'white'); ?>>Always White</option>
+            <option value="dynamic" <?php selected($menu_style, 'dynamic'); ?>>Dynamic (Primary Color on Transparent)</option>
+        </select>
+    </p>
+    <?php
+}
+
+// Save menu style meta box data
+function save_menu_style_meta_box($post_id) {
+    // Add debug logging
+    error_log('Attempting to save menu style for post ' . $post_id);
+
+    // Check if our nonce is set and verify it
+    if (!isset($_POST['menu_style_meta_box_nonce'])) {
+        error_log('Menu style nonce not set');
+        return;
+    }
+
+    if (!wp_verify_nonce($_POST['menu_style_meta_box_nonce'], 'menu_style_meta_box')) {
+        error_log('Menu style nonce verification failed');
+        return;
+    }
+
+    // If this is an autosave, don't do anything
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        error_log('This is an autosave');
+        return;
+    }
+
+    // Check the user's permissions
+    if (!current_user_can('edit_post', $post_id)) {
+        error_log('User cannot edit post');
+        return;
+    }
+
+    // Save the menu style
+    if (isset($_POST['menu_style'])) {
+        $style = sanitize_text_field($_POST['menu_style']);
+        update_post_meta($post_id, '_menu_style', $style);
+        error_log('Saved menu style: ' . $style);
+    } else {
+        error_log('Menu style not set in POST data');
+    }
+
+    // Verify it was saved
+    $saved_style = get_post_meta($post_id, '_menu_style', true);
+    error_log('Retrieved saved style: ' . $saved_style);
+}
+add_action('save_post', 'save_menu_style_meta_box');
+
+// Add body classes for menu backgrounds
+function add_menu_body_classes($classes) {
+    // Get the current post ID and debug info
+    $post_id = get_queried_object_id();
+    $menu_style = get_post_meta($post_id, '_menu_style', true);
+    
+    // Add debug comment
+    add_action('wp_footer', function() use ($post_id, $menu_style) {
+        echo "<!-- Debug: Post ID: {$post_id}, Menu Style: {$menu_style} -->";
+    });
+
+    // Check if we're on a portfolio page
+    $is_portfolio = is_page_template('page-templates/template-portfolio.php') ||
+                   is_post_type_archive('project_gallery') ||
+                   is_singular('project_gallery');
+
+    // Always add transparent-background on portfolio pages
+    if ($is_portfolio) {
+        $classes[] = 'transparent-background';
+    }
+
+    // Add menu-dynamic class if set
+    if ($menu_style === 'dynamic') {
+        $classes[] = 'menu-dynamic';
+    }
+
+    return $classes;
+}
+add_filter('body_class', 'add_menu_body_classes');
+
 add_action('init', 'mytheme_register_menus');
 
 // Include Custom Elementor Widgets

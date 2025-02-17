@@ -1,33 +1,60 @@
-function isMobile() {
-    return window.innerWidth <= 768;
+// More reliable device detection
+function getDeviceType() {
+    const ua = navigator.userAgent;
+    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+        return 'tablet';
+    }
+    if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+        return 'mobile';
+    }
+    return 'desktop';
 }
 
-function easeInOutQuint(t) {
-    return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+// Simplified easing function that works well across devices
+function easeInOutQuart(t) {
+    return t < 0.5 
+        ? 8 * t * t * t * t 
+        : 1 - 8 * (--t) * t * t * t;
 }
 
-function easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+// Fallback for browsers that don't support smooth scrolling
+function isReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-function smoothScrollTo(targetPosition, duration = 2000) {
-    const startPosition = window.pageYOffset;
+function smoothScrollTo(targetPosition) {
+    // Check if native smooth scroll is supported and no reduced motion
+    if ('scrollBehavior' in document.documentElement.style && !isReducedMotion()) {
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+        return;
+    }
+
+    // Fallback for browsers without smooth scroll support
+    const startPosition = window.pageYOffset || document.documentElement.scrollTop;
     const distance = targetPosition - startPosition;
+    const deviceType = getDeviceType();
+    
+    // Adjust duration based on device and distance - much slower animation
+    let duration = Math.min(Math.abs(distance) * 2.5, 3500); // Much slower base duration
+    if (deviceType !== 'desktop') {
+        duration = Math.min(duration, 2500); // Slower on mobile but still optimized
+    }
+
     let startTime = null;
-
-    // Use different easing and duration for mobile
-    const easingFunction = isMobile() ? easeInOutQuint : easeInOutCubic;
-    const scrollDuration = isMobile() ? 1500 : duration; // 1.5s for mobile
-
+    
     function animation(currentTime) {
-        if (startTime === null) startTime = currentTime;
+        if (!startTime) startTime = currentTime;
         const timeElapsed = currentTime - startTime;
-        const progress = Math.min(timeElapsed / scrollDuration, 1);
-        const easeProgress = easingFunction(progress);
+        const progress = Math.min(timeElapsed / duration, 1);
+        const easeProgress = easeInOutQuart(progress);
+        
+        const scrollPosition = startPosition + (distance * easeProgress);
+        window.scrollTo(0, scrollPosition);
 
-        window.scrollTo(0, startPosition + distance * easeProgress);
-
-        if (timeElapsed < scrollDuration) {
+        if (timeElapsed < duration) {
             requestAnimationFrame(animation);
         }
     }
@@ -35,28 +62,43 @@ function smoothScrollTo(targetPosition, duration = 2000) {
     requestAnimationFrame(animation);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for page load
-    window.addEventListener('load', function() {
-        // Check if we're on a portfolio or project page
-        const portfolioContent = document.getElementById('portfolio-content');
-        const projectContent = document.getElementById('project-content');
-        const targetElement = portfolioContent || projectContent;
+// Main initialization
+function initAutoScroll() {
+    const targetElement = document.getElementById('portfolio-content') || 
+                         document.getElementById('project-content');
+    
+    if (!targetElement) return;
 
-        if (targetElement) {
-            // Wait 500ms before scrolling
-            setTimeout(() => {
-                // Get the header height for offset
-                const headerWrapper = document.querySelector('.header-wrapper');
-                const headerHeight = headerWrapper ? headerWrapper.offsetHeight : 0;
-                const navHeight = document.querySelector('.main_menu_nav_wrapper')?.offsetHeight || 0;
-                
-                // Calculate the scroll position
-                const targetPosition = targetElement.offsetTop - navHeight;
-
-                // Smooth scroll to content
-                smoothScrollTo(targetPosition);
-            }, 500);
+    // Function to calculate and perform scroll
+    function performScroll() {
+        // Ensure all elements are properly loaded and measured
+        const headerWrapper = document.querySelector('.header-wrapper');
+        const mainNav = document.querySelector('.main_menu_nav_wrapper');
+        
+        if (!headerWrapper || !mainNav) {
+            // If elements aren't ready, retry after a short delay
+            setTimeout(performScroll, 100);
+            return;
         }
-    });
-});
+
+        const navHeight = mainNav.offsetHeight || 0;
+        const targetPosition = targetElement.offsetTop - navHeight;
+
+        // Add a small delay to ensure accurate measurements
+        setTimeout(() => smoothScrollTo(targetPosition), 1200);
+    }
+
+    // Initialize scroll after everything is loaded
+    if (document.readyState === 'complete') {
+        performScroll();
+    } else {
+        window.addEventListener('load', performScroll);
+    }
+}
+
+// Initialize once DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAutoScroll);
+} else {
+    initAutoScroll();
+}
