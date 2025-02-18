@@ -159,6 +159,15 @@ function mytheme_enqueue_scripts() {
     wp_enqueue_script('fade-in-script', get_template_directory_uri() . '/assets/js/section-observer-fade-in.js', array(), false, true);
     wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js');
 
+    // Portfolio view toggle script
+    if (is_post_type_archive('project_gallery') || is_page_template('page-templates/template-portfolio.php')) {
+        wp_enqueue_script('portfolio-view', get_template_directory_uri() . '/assets/js/portfolio-view.js', array('jquery'), null, true);
+        wp_localize_script('portfolio-view', 'portfolio_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('portfolio_view_nonce')
+        ));
+    }
+
     // Gallery scripts and styles
     if (is_post_type_archive('project_gallery') || is_singular('project_gallery')) {
         // Enqueue portfolio styles
@@ -1701,5 +1710,64 @@ function modify_project_gallery_archive_query($query) {
     }
 }
 add_action('pre_get_posts', 'modify_project_gallery_archive_query');
+
+// AJAX handler for portfolio view toggle
+function toggle_portfolio_view() {
+    check_ajax_referer('portfolio_view_nonce', 'nonce');
+
+    $view = sanitize_text_field($_POST['view'] ?? 'projects');
+    $output = '';
+
+    if ($view === 'media') {
+        // Get all project galleries
+        $projects = get_posts(array(
+            'post_type' => 'project_gallery',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+
+        // Collect all media IDs from projects
+        $all_media_ids = array();
+        foreach ($projects as $project) {
+            $media_ids = get_post_meta($project->ID, '_project_gallery_media', true);
+            if ($media_ids) {
+                $media_ids = explode(',', $media_ids);
+                $all_media_ids = array_merge($all_media_ids, $media_ids);
+            }
+        }
+
+        // Use media grid template
+        ob_start();
+        get_template_part('template-parts/media-grid', null, array(
+            'media_ids' => $all_media_ids,
+            'display_mode' => 'grid',
+            'gallery_name' => 'portfolio-media'
+        ));
+        $output = ob_get_clean();
+
+    } else {
+        // Projects view - show project thumbnails
+        $query = new WP_Query(array(
+            'post_type' => 'project_gallery',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+
+        ob_start();
+        while ($query->have_posts()) : $query->the_post();
+            get_template_part('template-parts/project-item');
+        endwhile;
+        wp_reset_postdata();
+        $output = ob_get_clean();
+    }
+    
+    wp_send_json_success(array('html' => $output));
+    die();
+}
+
+add_action('wp_ajax_toggle_portfolio_view', 'toggle_portfolio_view');
+add_action('wp_ajax_nopriv_toggle_portfolio_view', 'toggle_portfolio_view');
 
 ?>

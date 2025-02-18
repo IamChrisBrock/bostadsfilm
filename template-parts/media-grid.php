@@ -16,16 +16,18 @@ if (!empty($media_ids)) :
     if (is_string($media_ids)) {
         $media_ids = explode(',', $media_ids);
     }
+    
+    // Set grid class based on display mode
+    $grid_class = 'portfolio-grid';
+    if ($display_mode === 'full') {
+        $grid_class .= ' full-width-mode';
+    } elseif ($display_mode === 'masonry') {
+        $grid_class .= ' masonry-grid';
+    }
     ?>
-    <?php
-$grid_class = 'portfolio-grid row';
-if ($display_mode === 'full') {
-    $grid_class .= ' full-width-mode';
-} elseif ($display_mode === 'masonry') {
-    $grid_class .= ' masonry-grid';
-}
-?>
-<div class="<?php echo esc_attr($grid_class); ?>">
+    <div id="project-content" class="single-project-gallery">
+        <div class="container" style="padding-left:0px;padding-right:0px;">
+            <div class="<?php echo esc_attr($grid_class); ?>">
     <?php if ($display_mode === 'masonry') : ?>
         <div class="grid-sizer col-md-6 col-lg-4"></div>
     <?php endif; ?>
@@ -40,7 +42,7 @@ if ($display_mode === 'full') {
             <div class="<?php echo esc_attr($col_class); ?><?php echo $display_mode === 'masonry' ? ' grid-item' : ''; ?>">
                 <?php if ($type === 'video') : ?>
                     <div class="portfolio-item video-item" data-type="video">
-                        <video controls preload="metadata" playsinline class="w-100">
+                        <video controls preload="none" playsinline class="w-100 lazy-media" data-src="<?php echo esc_url($url); ?>">
                             <source src="<?php echo esc_url($url); ?>" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
@@ -52,12 +54,14 @@ if ($display_mode === 'full') {
                     if ($thumbnail) : ?>
                         <div class="portfolio-item" data-type="image">
                             <a href="<?php echo esc_url($url); ?>" class="glightbox" data-gallery="<?php echo esc_attr($gallery_name); ?>">
-                                <img src="<?php echo esc_url($thumbnail[0]); ?>" alt="<?php echo esc_attr(get_the_title($media_id)); ?>" class="w-100">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="<?php echo esc_url($thumbnail[0]); ?>" alt="<?php echo esc_attr(get_the_title($media_id)); ?>" class="w-100 lazy-media" loading="lazy">
                             </a>
                         </div>
                     <?php endif;
                 endif; ?>
             </div>
         <?php endforeach; ?>
+            </div>
+        </div>
     </div>
 <?php endif; ?>
