@@ -8,48 +8,12 @@ html {
     }
 }
 
-/* Portfolio Controls */
-.portfolio-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
 /* View Switch Styles */
 .view-switch {
     display: flex;
     align-items: center;
-    gap: 10px;
-}
-
-/* Media Tags Styles */
-.media-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    flex: 1;
-}
-
-.tag-filter {
-    background: #f0f0f0;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.tag-filter:hover {
-    background: #e0e0e0;
-}
-
-.tag-filter.active {
-    background: #333;
-    color: white;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
 }
 
 .switch {
