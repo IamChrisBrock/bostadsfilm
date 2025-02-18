@@ -53,8 +53,13 @@ jQuery(document).ready(function($) {
         // Update browser URL without reloading
         window.history.pushState({}, '', requestUrl);
         
-        // Show loading state
-        $portfolioItems.addClass('loading');
+        // Show loading state with placeholder
+        const placeholderHTML = '<div class="loading-placeholder">' + 
+            Array(8).fill('<div class="placeholder-item"></div>').join('') + 
+            '</div>';
+        $portfolioItems
+            .addClass('loading')
+            .html(placeholderHTML);
         
         // Reset container classes
         $portfolioItems

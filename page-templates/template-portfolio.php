@@ -42,12 +42,50 @@ $project_query = new WP_Query($args);
 ?>
 <div id="portfolio-content" class="portfolio-archive">
     <div class="container" style="padding-left:0px;padding-right:0px;">
-        <div class="view-switch">
-            <label class="switch">
-                <input type="checkbox" id="view-mode-toggle">
-                <span class="slider round"></span>
-            </label>
-            <span class="switch-label">Projects</span>
+        <div class="portfolio-controls">
+            <div class="view-switch">
+                <label class="switch">
+                    <input type="checkbox" id="view-mode-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Projects</span>
+            </div>
+            
+            <?php
+            // Get all unique tags from media items
+            $all_tags = array();
+            $all_projects_query = new WP_Query(array(
+                'post_type' => 'project_gallery',
+                'posts_per_page' => -1,
+                'orderby' => 'date',
+                'order' => 'DESC'
+            ));
+            
+            if ($all_projects_query->have_posts()) :
+                while ($all_projects_query->have_posts()) : $all_projects_query->the_post();
+                    $media_ids = get_post_meta(get_the_ID(), '_project_gallery_media', true);
+                    if ($media_ids) {
+                        $media_ids = explode(',', $media_ids);
+                        foreach ($media_ids as $media_id) {
+                            $media_tags = wp_get_post_terms($media_id, 'media_tag');
+                            foreach ($media_tags as $tag) {
+                                $all_tags[$tag->term_id] = $tag->name;
+                            }
+                        }
+                    }
+                endwhile;
+                wp_reset_postdata();
+            endif;
+            
+            if (!empty($all_tags)) : ?>
+                <div class="media-tags">
+                    <?php foreach ($all_tags as $tag_id => $tag_name) : ?>
+                        <button class="tag-filter" data-tag-id="<?php echo esc_attr($tag_id); ?>">
+                            <?php echo esc_html($tag_name); ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <?php
