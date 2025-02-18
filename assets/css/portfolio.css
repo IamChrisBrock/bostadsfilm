@@ -134,7 +134,41 @@ input:checked + .slider:before {
 }
 
 /* Adjust gap for non-full-width modes */
-.container .portfolio-grid {
+.container /* Masonry Grid Styles */
+.masonry-grid {
+    width: 100%;
+    margin:0 auto;
+}
+
+.masonry-grid .grid-sizer,
+.masonry-grid .grid-item {
+    width: 33.333%;
+}
+
+@media (max-width: 991px) {
+    .masonry-grid .grid-sizer,
+    .masonry-grid .grid-item {
+        width: 50%;
+    }
+}
+
+@media (max-width: 767px) {
+    .masonry-grid .grid-sizer,
+    .masonry-grid .grid-item {
+        width: 100%;
+    }
+}
+
+.masonry-grid .grid-item {
+    padding: 10px;
+}
+
+.masonry-grid .portfolio-item {
+    margin-bottom: 0;
+}
+
+/* Regular Grid Styles */
+.portfolio-grid {
     
 }
 

@@ -165,8 +165,8 @@ function mytheme_enqueue_scripts() {
         wp_enqueue_style('portfolio-css', get_template_directory_uri() . '/assets/css/portfolio.css');
         
         // Enqueue gallery scripts
-        wp_enqueue_script('masonry');
-        wp_enqueue_script('imagesloaded');
+        wp_enqueue_script('masonry', 'https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js', array('jquery'), '4.2.2', true);
+        wp_enqueue_script('imagesloaded', 'https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js', array('jquery'), '5.0.0', true);
         wp_enqueue_script('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js', array(), '3.2.0', true);
         wp_enqueue_style('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/css/glightbox.min.css');
         wp_enqueue_script('gallery-js', get_template_directory_uri() . '/assets/js/gallery.js', array('jquery', 'masonry', 'imagesloaded', 'glightbox'), '1.0', true);

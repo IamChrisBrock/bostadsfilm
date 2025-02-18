@@ -17,7 +17,18 @@ if (!empty($media_ids)) :
         $media_ids = explode(',', $media_ids);
     }
     ?>
-    <div class="portfolio-grid row<?php echo $display_mode === 'full' ? ' full-width-mode' : ''; ?>">
+    <?php
+$grid_class = 'portfolio-grid row';
+if ($display_mode === 'full') {
+    $grid_class .= ' full-width-mode';
+} elseif ($display_mode === 'masonry') {
+    $grid_class .= ' masonry-grid';
+}
+?>
+<div class="<?php echo esc_attr($grid_class); ?>">
+    <?php if ($display_mode === 'masonry') : ?>
+        <div class="grid-sizer col-md-6 col-lg-4"></div>
+    <?php endif; ?>
         <?php foreach ($media_ids as $media_id) :
             // Get media type and URL
             $type = wp_attachment_is('video', $media_id) ? 'video' : 'image';
@@ -26,7 +37,7 @@ if (!empty($media_ids)) :
             // Set column class based on display mode
             $col_class = $display_mode === 'full' ? 'col-12' : 'col-md-6 col-lg-4';
             ?>
-            <div class="<?php echo esc_attr($col_class); ?>">
+            <div class="<?php echo esc_attr($col_class); ?><?php echo $display_mode === 'masonry' ? ' grid-item' : ''; ?>">
                 <?php if ($type === 'video') : ?>
                     <div class="portfolio-item video-item" data-type="video">
                         <video controls preload="metadata" playsinline class="w-100">
