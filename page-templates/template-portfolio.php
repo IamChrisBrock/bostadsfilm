@@ -42,12 +42,63 @@ $project_query = new WP_Query($args);
 ?>
 <div id="portfolio-content" class="portfolio-archive">
     <div class="container" style="padding-left:0px;padding-right:0px;">
-        <div class="view-switch">
-            <label class="switch">
-                <input type="checkbox" id="view-mode-toggle">
-                <span class="slider round"></span>
-            </label>
-            <span class="switch-label">Projects</span>
+        <div class="portfolio-header">
+            <div class="view-switch">
+                <label class="switch">
+                    <input type="checkbox" id="view-mode-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Projects</span>
+            </div>
+            
+            <div class="media-tags">
+                <?php
+                // Get all project posts
+                $all_projects_query = new WP_Query(array(
+                    'post_type' => 'project_gallery',
+                    'posts_per_page' => -1
+                ));
+
+                $all_tags = array();
+                
+                if ($all_projects_query->have_posts()) :
+                    while ($all_projects_query->have_posts()) : $all_projects_query->the_post();
+                        // Get media IDs
+                        $media_ids = get_post_meta(get_the_ID(), '_project_gallery_media', true);
+                        if ($media_ids) {
+                            $media_ids = explode(',', $media_ids);
+                            foreach ($media_ids as $media_id) {
+                                // Get all taxonomies for this attachment
+                                $taxonomies = get_object_taxonomies('attachment');
+                                error_log('Available taxonomies for attachment: ' . print_r($taxonomies, true));
+                                
+                                // Get terms for each taxonomy
+                                foreach ($taxonomies as $taxonomy) {
+                                    $terms = wp_get_object_terms($media_id, $taxonomy);
+                                    if (!empty($terms) && !is_wp_error($terms)) {
+                                        foreach ($terms as $term) {
+                                            $all_tags[$term->slug] = $term->name;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    endwhile;
+                    wp_reset_postdata();
+                endif;
+                
+                // Debug output
+                error_log('Found tags: ' . print_r($all_tags, true));
+                
+                if (!empty($all_tags)) :
+                    foreach ($all_tags as $slug => $name) : ?>
+                        <button class="tag-filter" data-tag="<?php echo esc_attr($slug); ?>">
+                            <?php echo esc_html($name); ?>
+                        </button>
+                    <?php endforeach;
+                endif;
+                ?>
+            </div>
         </div>
 
         <?php
@@ -60,6 +111,9 @@ $project_query = new WP_Query($args);
             $view_mode = isset($_GET['view']) && $_GET['view'] === 'media' ? 'media' : 'projects';
             error_log('View mode: ' . $view_mode . ', GET[view]: ' . (isset($_GET['view']) ? $_GET['view'] : 'not set'));
             
+            // Get active tags from URL
+            $active_tags = isset($_GET['tags']) ? explode(',', $_GET['tags']) : array();
+            
             if ($view_mode === 'media') {
                 // Get all project posts without pagination
                 $all_projects_query = new WP_Query(array(
@@ -69,18 +123,64 @@ $project_query = new WP_Query($args);
                     'order' => 'DESC'
                 ));
 
-                // Collect all media IDs from all projects
+                // Collect media IDs that match the active tags
                 $all_media_ids = array();
+                $processed_media_ids = array(); // Track processed media to avoid duplicates
+                
                 if ($all_projects_query->have_posts()) {
                     while ($all_projects_query->have_posts()) : $all_projects_query->the_post();
                         $media_ids = get_post_meta(get_the_ID(), '_project_gallery_media', true);
                         if ($media_ids) {
                             $media_ids = explode(',', $media_ids);
-                            $all_media_ids = array_merge($all_media_ids, $media_ids);
+                            
+                            // Process each media item
+                            foreach ($media_ids as $media_id) {
+                                // Skip if we've already processed this media item
+                                if (in_array($media_id, $processed_media_ids)) {
+                                    continue;
+                                }
+                                
+                                $should_include = true;
+                                
+                                // If there are active tags, check if media has all of them
+                                if (!empty($active_tags)) {
+                                    // Get all terms for this media item
+                                    $all_terms = array();
+                                    $taxonomies = get_object_taxonomies('attachment');
+                                    
+                                    foreach ($taxonomies as $taxonomy) {
+                                        $terms = wp_get_object_terms($media_id, $taxonomy, array('fields' => 'slugs'));
+                                        if (!is_wp_error($terms)) {
+                                            $all_terms = array_merge($all_terms, $terms);
+                                        }
+                                    }
+                                    
+                                    // Check if media has all active tags
+                                    foreach ($active_tags as $tag) {
+                                        if (!in_array($tag, $all_terms)) {
+                                            $should_include = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // Include media if it matches all criteria
+                                if ($should_include) {
+                                    $all_media_ids[] = $media_id;
+                                    $processed_media_ids[] = $media_id; // Mark as processed
+                                }
+                            }
                         }
                     endwhile;
                     wp_reset_postdata();
                 }
+                
+                // Remove any remaining duplicates and reindex array
+                $all_media_ids = array_values(array_unique($all_media_ids));
+                
+                // Debug output
+                error_log('Active tags: ' . print_r($active_tags, true));
+                error_log('Filtered media IDs: ' . print_r($all_media_ids, true));
                 
                 // Media view markup
                 ?>

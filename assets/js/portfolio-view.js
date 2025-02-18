@@ -1,4 +1,51 @@
 jQuery(document).ready(function($) {
+    console.log('Initializing portfolio view...');
+    
+    // Track active tags
+    let activeTags = new Set();
+    
+    // Initialize tag click handlers
+    function initTagHandlers() {
+        console.log('Initializing tag handlers...');
+        $('.tag-filter').each(function() {
+            console.log('Found tag:', $(this).data('tag'));
+        });
+        
+        // Use event delegation for tag clicks
+        $(document).on('click', '.tag-filter', function(e) {
+            e.preventDefault();
+            const tag = $(this).data('tag');
+            console.log('Tag clicked:', tag);
+            
+            // Toggle active state
+            $(this).toggleClass('active');
+            
+            if ($(this).hasClass('active')) {
+                activeTags.add(tag);
+            } else {
+                activeTags.delete(tag);
+            }
+            
+            console.log('Active tags:', Array.from(activeTags));
+            updateView($viewModeToggle.is(':checked'));
+        });
+    }
+    
+    // Initialize tag handlers
+    initTagHandlers();
+    
+    // Handle clear filters button
+    $(document).on('click', '.clear-filters-btn', function(e) {
+        e.preventDefault();
+        console.log('Clearing all filters');
+        
+        // Clear active tags
+        activeTags.clear();
+        $('.tag-filter').removeClass('active');
+        
+        // Use updateView to reload content, just like when deactivating individual tags
+        updateView($viewModeToggle.is(':checked'));
+    });
     const $viewModeToggle = $('#view-mode-toggle');
     const $switchLabel = $('.switch-label');
     const $portfolioItems = $('#portfolio-items');
@@ -32,20 +79,30 @@ jQuery(document).ready(function($) {
     }
     initLightbox();
     
+
+    
     function updateView(isMediaView) {
-        
+        console.log('Updating view, isMediaView:', isMediaView);
+        console.log('Active tags:', Array.from(activeTags));
         
         // Update label
         $switchLabel.text(isMediaView ? 'Media' : 'Projects');
         
         // Create URL for the AJAX request
         const requestUrl = new URL(window.location);
+        
+        // Handle view mode
         if (isMediaView) {
             requestUrl.searchParams.set('view', 'media');
         } else {
-            // For projects view, force a clean URL
             requestUrl.searchParams.delete('view');
             requestUrl.searchParams.delete('paged');
+        }
+        
+        // Handle active tags
+        requestUrl.searchParams.delete('tags');
+        if (activeTags.size > 0) {
+            requestUrl.searchParams.set('tags', Array.from(activeTags).join(','));
         }
         
         
@@ -78,14 +135,19 @@ jQuery(document).ready(function($) {
             url: requestUrl.toString(),
             type: 'GET',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            },
+            beforeSend: function() {
+                console.log('Sending AJAX request to:', requestUrl.toString());
             },
             success: function(response) {
-                
+                console.log('AJAX response received');
                 
                 // Extract the portfolio items content from the response
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(response, 'text/html');
+                console.log('Parsed response document');
                 
                 
                 // Try both jQuery and native selectors
@@ -178,14 +240,23 @@ jQuery(document).ready(function($) {
         });
     }
     
+
+    
     // Handle toggle change
     $viewModeToggle.on('change', function() {
         const isChecked = $(this).is(':checked');
-        
         updateView(isChecked);
     });
     
-    // Initialize view based on URL parameter
+    // Initialize based on URL parameters
+    if (urlParams.get('tags')) {
+        const tags = urlParams.get('tags').split(',');
+        tags.forEach(tag => {
+            activeTags.add(tag);
+            $(`.tag-filter[data-tag="${tag}"]`).addClass('active');
+        });
+    }
+    
     if (urlParams.get('view') === 'media') {
         $viewModeToggle.prop('checked', true);
         updateView(true); // Actually load the media view

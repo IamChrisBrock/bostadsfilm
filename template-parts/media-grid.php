@@ -12,26 +12,30 @@ $display_mode = isset($args['display_mode']) ? $args['display_mode'] : 'grid';
 $gallery_name = isset($args['gallery_name']) ? $args['gallery_name'] : 'media-gallery';
 $media_ids = isset($args['media_ids']) ? $args['media_ids'] : [];
 
-if (!empty($media_ids)) :
-    if (is_string($media_ids)) {
-        $media_ids = explode(',', $media_ids);
-    }
-    
-    // Set grid class based on display mode
-    $grid_class = 'portfolio-grid';
-    if ($display_mode === 'full') {
-        $grid_class .= ' full-width-mode';
-    } elseif ($display_mode === 'masonry') {
-        $grid_class .= ' masonry-grid';
-    }
-    ?>
-    <div id="project-content" class="single-project-gallery">
-        <div class="container" style="padding-left:0px;padding-right:0px;">
-            <div class="<?php echo esc_attr($grid_class); ?>">
-    <?php if ($display_mode === 'masonry') : ?>
-        <div class="grid-sizer col-md-6 col-lg-4"></div>
-    <?php endif; ?>
-        <?php foreach ($media_ids as $media_id) :
+// Set grid class based on display mode
+$grid_class = 'portfolio-grid';
+if ($display_mode === 'full') {
+    $grid_class .= ' full-width-mode';
+} elseif ($display_mode === 'masonry') {
+    $grid_class .= ' masonry-grid';
+}
+?>
+<div id="project-content" class="single-project-gallery">
+    <div class="container" style="padding-left:0px;padding-right:0px;">
+        <div class="<?php echo esc_attr($grid_class); ?>">
+            <?php if (empty($media_ids) || (is_array($media_ids) && count($media_ids) === 0)) : ?>
+                <div class="no-results-message">
+                    <p>No media items found matching the selected filters.</p>
+                    <button class="clear-filters-btn">Clear Filters</button>
+                </div>
+            <?php else :
+                if (is_string($media_ids)) {
+                    $media_ids = explode(',', $media_ids);
+                }
+                if ($display_mode === 'masonry') : ?>
+                    <div class="grid-sizer col-md-6 col-lg-4"></div>
+                <?php endif; ?>
+                <?php foreach ($media_ids as $media_id) :
             // Get media type and URL
             $type = wp_attachment_is('video', $media_id) ? 'video' : 'image';
             $url = wp_get_attachment_url($media_id);
@@ -61,7 +65,7 @@ if (!empty($media_ids)) :
                 endif; ?>
             </div>
         <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-<?php endif; ?>
