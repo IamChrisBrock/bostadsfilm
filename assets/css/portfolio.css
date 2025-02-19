@@ -311,11 +311,7 @@ input:checked + .slider:before {
     margin-bottom: 0;
 }
 
-/* Grid Item Hover Effects */
-.portfolio-item a:hover img {
-    transform: scale(1.05);
-    transition: transform 0.3s ease;
-}
+
 
 .portfolio-item.video-item video {
     width: 100%;
@@ -432,9 +428,6 @@ input:checked + .slider:before {
     width: 100%;
 }
 
-.portfolio-archive .portfolio-item:hover {
-    transform: translateY(-5px);
-}
 
 .portfolio-item-image {
     position: relative;
