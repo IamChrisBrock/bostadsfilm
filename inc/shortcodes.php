@@ -35,7 +35,7 @@ function project_gallery_shortcode($atts) {
 
 
     // Display gallery
-    echo '<div class="portfolio-grid columns-' . esc_attr($atts['columns']) . '">';
+    echo '<div class="gallery-grid columns-' . esc_attr($atts['columns']) . '">';
     foreach ($media_ids as $media_id) {
         $type = wp_attachment_is('video', $media_id) ? 'video' : 'image';
         $url = wp_get_attachment_url($media_id);

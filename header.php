@@ -33,10 +33,6 @@ if (in_array('transparent-background', $body_classes)) {
     $menu_classes[] = 'transparent-background';
 }
 
-// Add transparent-header class for portfolio page
-if (is_page_template('page-templates/template-portfolio.php')) {
-    $menu_classes[] = 'transparent-header';
-}
 ?>
 <div class="<?php echo esc_attr(implode(' ', $menu_classes)); ?>">
     <div class="main_menu_nav_container">
