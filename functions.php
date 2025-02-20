@@ -47,11 +47,12 @@ function mytheme_enqueue_css() {
     wp_enqueue_style('menu-css', get_template_directory_uri() . '/assets/css/menu.css');
     wp_enqueue_style('custom-contact-form-7-css', get_template_directory_uri() . '/assets/css/cf7-custom.css');
     
-    // Enqueue project galleries styles on relevant pages
+    // Enqueue project galleries styles and scripts on relevant pages
     if (is_post_type_archive('project_gallery') || 
         is_singular('project_gallery') || 
         is_page_template('page-templates/template-gallery.php')) {
         wp_enqueue_style('project-galleries', get_template_directory_uri() . '/assets/css/project-galleries.css');
+        wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery', 'lottie-js'), null, true);
     }
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');

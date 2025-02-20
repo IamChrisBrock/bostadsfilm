@@ -13,23 +13,47 @@
             this.isLoading = false;
             this.currentPage = 1;
             
-            // Create a simple loading indicator
+            // Create loading animation container
             this.loadingIndicator = $('<div>', {
                 class: 'gallery-loading-indicator',
-                text: 'Loading...',
                 css: {
                     display: 'none',
                     position: 'fixed',
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    padding: '10px 20px',
-                    background: 'rgba(0,0,0,0.8)',
-                    color: 'white',
-                    borderRadius: '5px',
-                    zIndex: 1000
+                    width: '100px',  // Reduced size
+                    height: '100px',  // Reduced size
+                    zIndex: 1000,
+                    background: 'transparent',  // Ensure background is transparent
+                    pointerEvents: 'none'  // Don't block clicks
                 }
             }).appendTo('body');
+
+            // Initialize loading animation with error handling
+            const animationPath = document.querySelector('meta[name="theme-url"]').content + '/assets/lottie/loading-house.json';
+            console.log('Loading animation from:', animationPath);
+
+            this.loadingAnimation = lottie.loadAnimation({
+                container: this.loadingIndicator[0],
+                renderer: 'svg',
+                loop: true,
+                autoplay: false,
+                path: animationPath
+            });
+
+            // Add event listeners for debugging
+            this.loadingAnimation.addEventListener('data_ready', () => {
+                console.log('Lottie data loaded successfully');
+            });
+
+            this.loadingAnimation.addEventListener('data_failed', () => {
+                console.error('Failed to load Lottie animation');
+            });
+
+            this.loadingAnimation.addEventListener('DOMLoaded', () => {
+                console.log('Lottie DOM elements loaded');
+            });
             
             this.initEvents();
             this.initInfiniteScroll();
@@ -88,6 +112,10 @@
             console.log('Starting AJAX request...');
             this.galleryGrid.addClass('loading');
             this.loadingIndicator.show();
+            
+            // Reset and play animation
+            this.loadingAnimation.goToAndPlay(0, true);
+            console.log('Playing animation...');
 
             // Make AJAX request
             $.ajax({
@@ -138,6 +166,8 @@
                     this.isLoading = false;
                     this.galleryGrid.removeClass('loading');
                     this.loadingIndicator.hide();
+                    this.loadingAnimation.stop();
+                    console.log('Animation stopped');
                 }
             });
         }

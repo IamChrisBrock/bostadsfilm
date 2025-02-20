@@ -140,25 +140,36 @@
 .tag-item {
     display: inline-flex;
     align-items: center;
-    padding: 0.5rem 1rem;
-    background: #fff;
-    border: 1px solid #ddd;
+    padding: 3px 10px;
+    background: #ddd;
+    border: 0;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 0.8rem;
 }
 
 .tag-item:hover {
-    border-color: #007bff;
+    background: #ccc;
 }
 
 .tag-item input[type="checkbox"] {
     display: none;
 }
 
-.tag-item input[type="checkbox"]:checked + .tag-name {
-    color: #007bff;
-    font-weight: 600;
+.tag-item input[type="checkbox"]:checked + .tag-name,
+.tag-item input[type="checkbox"]:checked ~ .tag-count {
+    color: #fff;
+}
+
+.tag-item input[type="checkbox"]:checked {
+    background: #666;
+}
+
+/* Change the entire tag background when checked */
+.tag-item:has(input[type="checkbox"]:checked) {
+    background: #666;
+    color: #fff;
 }
 
 .tag-name {
