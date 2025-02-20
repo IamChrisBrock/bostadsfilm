@@ -1,5 +1,19 @@
 /* Project Galleries Styling */
 
+/* Grid Spacing Overrides */
+.gallery-grid .row {
+    margin-right: -0.5px;
+    margin-left: -0.5px;
+}
+
+.gallery-grid .col-md-6,
+.gallery-grid .col-lg-4 {
+    padding-right: 0.5px;
+    padding-left: 0.5px;
+    margin-bottom: 1px;
+}
+
+
 /* Full Window Header */
 .full-window-header {
     position: relative;
@@ -326,7 +340,7 @@
 }
 
 .gallery-item {
-    margin-bottom: 30px;
+    margin-bottom: 0;
 }
 
 .gallery-item-link {
@@ -523,9 +537,7 @@
     margin-bottom: 3rem;
 }
 
-.gallery-item {
-    margin-bottom: 2rem;
-}
+
 
 .gallery-item img {
     width: 100%;
