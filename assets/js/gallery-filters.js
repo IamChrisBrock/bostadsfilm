@@ -6,11 +6,30 @@
 
     class GalleryFilter {
         constructor() {
+            console.log('Initializing GalleryFilter');
             this.filterForm = $('.gallery-filters');
             this.galleryGrid = $('.gallery-grid');
             this.pagination = $('.pagination');
             this.isLoading = false;
             this.currentPage = 1;
+            
+            // Create a simple loading indicator
+            this.loadingIndicator = $('<div>', {
+                class: 'gallery-loading-indicator',
+                text: 'Loading...',
+                css: {
+                    display: 'none',
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    padding: '10px 20px',
+                    background: 'rgba(0,0,0,0.8)',
+                    color: 'white',
+                    borderRadius: '5px',
+                    zIndex: 1000
+                }
+            }).appendTo('body');
             
             this.initEvents();
             this.initInfiniteScroll();
@@ -66,7 +85,9 @@
             window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
 
             // Show loading state
+            console.log('Starting AJAX request...');
             this.galleryGrid.addClass('loading');
+            this.loadingIndicator.show();
 
             // Make AJAX request
             $.ajax({
@@ -82,20 +103,41 @@
                 },
                 success: (response) => {
                     if (response.success) {
-                        if (this.currentPage === 1) {
-                            this.galleryGrid.html(response.data.html);
-                        } else {
-                            this.galleryGrid.append(response.data.html);
-                        }
+                        const $newContent = $(response.data.html);
+                        
+                        // Pre-load images before showing content
+                        const imagePromises = [];
+                        $newContent.find('img').each(function() {
+                            const promise = new Promise((resolve) => {
+                                const img = new Image();
+                                img.onload = resolve;
+                                img.src = this.src;
+                            });
+                            imagePromises.push(promise);
+                        });
 
-                        if (this.currentPage >= response.data.max_pages) {
-                            $(window).off('scroll');
-                        }
+                        // Once all images are loaded, show the content
+                        Promise.all(imagePromises).then(() => {
+                            if (this.currentPage === 1) {
+                                this.galleryGrid.html($newContent);
+                            } else {
+                                this.galleryGrid.append($newContent);
+                            }
+
+                            if (this.currentPage >= response.data.max_pages) {
+                                $(window).off('scroll');
+                            }
+                        });
                     }
                 },
+                error: (jqXHR, textStatus, errorThrown) => {
+                    console.error('AJAX error:', textStatus, errorThrown);
+                },
                 complete: () => {
+                    console.log('AJAX request completed');
                     this.isLoading = false;
                     this.galleryGrid.removeClass('loading');
+                    this.loadingIndicator.hide();
                 }
             });
         }

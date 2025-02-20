@@ -1,6 +1,27 @@
 <?php
 add_filter('show_admin_bar', '__return_false');
 
+// Autoloader for component classes
+spl_autoload_register(function ($class) {
+    // Base directory for components
+    $base_dir = get_template_directory() . '/inc/';
+
+    // Only handle our namespace
+    if (strpos($class, 'Inkperial\\Components\\') !== 0) {
+        return;
+    }
+
+    // Remove namespace prefix
+    $relative_class = str_replace('Inkperial\\Components\\', '', $class);
+
+    // Convert class name to file path
+    $file = $base_dir . 'components/class-' . strtolower(str_replace('_', '-', $relative_class)) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
 // Include theme files
 require get_template_directory() . '/inc/colors.php';
 require get_template_directory() . '/inc/gallery-settings.php';
@@ -75,6 +96,9 @@ function mytheme_enqueue_scripts() {
     wp_enqueue_style('mytheme-style', get_stylesheet_uri());
     wp_enqueue_script('fade-in-script', get_template_directory_uri() . '/assets/js/section-observer-fade-in.js', array(), false, true);
     wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js');
+    
+    // Load Lottie globally since it's used in multiple places
+    wp_enqueue_script('lottie-js', 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js', array(), '5.12.2', true);
 
 
     // Gallery scripts and styles
@@ -85,7 +109,7 @@ function mytheme_enqueue_scripts() {
         
         // Gallery filters
         if (is_post_type_archive('project_gallery') || is_tax('project_tags') || is_page_template('page-templates/template-gallery.php')) {
-            wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery'), '1.0', true);
+            wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery', 'lottie-js'), '1.0', true);
             wp_localize_script('gallery-filters', 'galleryFilters', array(
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('gallery_filter')

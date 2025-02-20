@@ -44,6 +44,8 @@ add_action('pre_get_posts', 'modify_gallery_query');
 /**
  * AJAX handler for gallery filtering
  */
+use Inkperial\Components\Gallery_Item;
+
 function filter_galleries() {
     check_ajax_referer('gallery_filter', 'nonce');
 
@@ -78,8 +80,10 @@ function filter_galleries() {
     if ($query->have_posts()) {
         while ($query->have_posts()) {
             $query->the_post();
-            get_template_part('template-parts/content', 'gallery');
+            $gallery_item = new Gallery_Item(get_post());
+            $gallery_item->render();
         }
+        wp_reset_postdata();
     } else {
         echo '<p class="no-results">' . __('No galleries found matching your criteria.', 'filmestate') . '</p>';
     }
