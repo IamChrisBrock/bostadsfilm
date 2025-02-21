@@ -49,10 +49,15 @@ use Inkperial\Components\Gallery_Item;
 function filter_galleries() {
     check_ajax_referer('gallery_filter', 'nonce');
 
+    // Debug incoming request
+    error_log('Incoming filter request - POST data: ' . print_r($_POST, true));
+
+    // Base query arguments
     $args = array(
         'post_type' => 'project_gallery',
         'posts_per_page' => get_option('posts_per_page'),
         'paged' => isset($_POST['page']) ? absint($_POST['page']) : 1,
+        'suppress_filters' => false // Ensure filters are not suppressed
     );
 
     // Add tag filtering
@@ -68,30 +73,85 @@ function filter_galleries() {
         );
     }
 
-    // Add sorting
-    if (!empty($_POST['orderby'])) {
-        $args['orderby'] = sanitize_text_field($_POST['orderby']);
-        $args['order'] = !empty($_POST['order']) ? sanitize_text_field($_POST['order']) : 'DESC';
+    // Handle sorting
+    $orderby = isset($_POST['orderby']) ? sanitize_text_field($_POST['orderby']) : 'date';
+    $order = isset($_POST['order']) ? strtoupper(sanitize_text_field($_POST['order'])) : 'DESC';
+
+    // Remove any existing orderby filters
+    remove_all_filters('posts_orderby');
+
+    // Set orderby and order with secondary sort
+    if ($orderby === 'title') {
+        $args['orderby'] = 'title';
+        $args['order'] = $order;
+        // Force our sort order
+        add_filter('posts_orderby', function($orderby) use ($order) {
+            return "wp_inkperial_posts.post_title $order, wp_inkperial_posts.post_date $order";
+        }, 999);
+    } else {
+        $args['orderby'] = 'date';
+        $args['order'] = $order;
+        // Force our sort order
+        add_filter('posts_orderby', function($orderby) use ($order) {
+            return "wp_inkperial_posts.post_date $order, wp_inkperial_posts.ID $order";
+        }, 999);
     }
 
+    // Ensure menu_order is not used
+    add_filter('posts_orderby_request', function($orderby_sql) {
+        return str_replace('menu_order,', '', $orderby_sql);
+    }, 999);
+
+    // Capture the SQL query
+    $sql_query = '';
+    add_filter('posts_request', function($sql) use (&$sql_query) {
+        $sql_query = $sql;
+        return $sql;
+    });
+
+    // Run the query
     $query = new WP_Query($args);
+    
+    // Remove the filter
+    remove_filter('posts_request', function($sql) {
+        return $sql;
+    });
+    
+    // Get post data for debugging
+    $posts_data = array_map(function($post) {
+        return array(
+            'ID' => $post->ID,
+            'post_title' => $post->post_title,
+            'post_date' => $post->post_date
+        );
+    }, $query->posts);
     
     ob_start();
     if ($query->have_posts()) {
+        
         while ($query->have_posts()) {
             $query->the_post();
             $gallery_item = new Gallery_Item(get_post());
             $gallery_item->render();
         }
+        
         wp_reset_postdata();
     } else {
         echo '<p class="no-results">' . __('No galleries found matching your criteria.', 'filmestate') . '</p>';
     }
     $html = ob_get_clean();
     
+    // Send response with detailed debug info
     wp_send_json_success(array(
         'html' => $html,
         'max_pages' => $query->max_num_pages,
+        'debug' => array(
+            'query_args' => $args,
+            'sql_query' => $sql_query,
+            'found_posts' => $query->found_posts,
+            'post_count' => $query->post_count,
+            'posts_data' => $posts_data
+        )
     ));
 }
 add_action('wp_ajax_filter_galleries', 'filter_galleries');

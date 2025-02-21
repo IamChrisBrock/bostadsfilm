@@ -66,8 +66,9 @@
                 this.updateFilters();
             });
 
-            // Handle sorting
-            this.filterForm.find('select').on('change', () => {
+            // Handle sorting changes
+            this.filterForm.find('.orderby-select, .order-select').on('change', (e) => {
+                console.log('Sort change:', e.target.name, e.target.value);
                 this.currentPage = 1;
                 this.updateFilters();
             });
@@ -95,9 +96,10 @@
                 selectedTags.push($(this).val());
             });
 
-            // Get sorting options
-            const orderby = this.filterForm.find('.orderby-select').val();
-            const order = this.filterForm.find('.order-select').val();
+            // Get sorting options with debug
+            const orderby = this.filterForm.find('select[name="orderby"]').val();
+            const order = this.filterForm.find('select[name="order"]').val();
+            console.log('Sorting params - orderby:', orderby, 'order:', order);
 
             // Update URL
             const params = new URLSearchParams(window.location.search);
@@ -131,6 +133,9 @@
                 },
                 success: (response) => {
                     if (response.success) {
+                        // Log debug info
+                        console.log('AJAX success, server response:', response.data.debug);
+                        
                         const $newContent = $(response.data.html);
                         
                         // Pre-load images before showing content
@@ -146,11 +151,10 @@
 
                         // Once all images are loaded, show the content
                         Promise.all(imagePromises).then(() => {
-                            if (this.currentPage === 1) {
-                                this.galleryGrid.html($newContent);
-                            } else {
-                                this.galleryGrid.append($newContent);
-                            }
+                            console.log('Images loaded, updating gallery with sorted content');
+                            // Clear existing content and update
+                            // Since the response already includes the row div, we just need to replace the content
+                            this.galleryGrid.empty().append($newContent);
 
                             if (this.currentPage >= response.data.max_pages) {
                                 $(window).off('scroll');
