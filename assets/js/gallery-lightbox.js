@@ -1,4 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Plyr for grid videos
+    const gridVideos = document.querySelectorAll('.js-player:not(.plyr--setup)');
+    gridVideos.forEach(video => {
+        if (!video.classList.contains('plyr--setup')) {
+            new Plyr(video, {
+                controls: [
+                    'play-large',
+                    'play',
+                    'progress',
+                    'current-time',
+                    'mute',
+                    'volume',
+                    'fullscreen'
+                ],
+                hideControls: false
+            });
+            video.classList.add('plyr--setup');
+        }
+    });
+
+    // Initialize GLightbox
     const lightbox = GLightbox({
         selector: '.glightbox',
         touchNavigation: true,
@@ -12,6 +33,24 @@ document.addEventListener('DOMContentLoaded', function() {
         draggable: true,
         zoomable: true,
         dragAutoSnap: true,
-        descPosition: 'bottom'
+        descPosition: 'bottom',
+        videosWidth: '960px',
+        plyr: {
+            css: false,
+            js: false,
+            config: {
+                controls: [
+                    'play-large',
+                    'play',
+                    'progress',
+                    'current-time',
+                    'mute',
+                    'volume',
+                    'fullscreen'
+                ],
+                hideControls: false
+            }
+        }
     });
 });
+

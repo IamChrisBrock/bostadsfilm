@@ -106,10 +106,20 @@ function mytheme_enqueue_scripts() {
     // Gallery scripts and styles
         wp_enqueue_script('masonry', 'https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js', array('jquery'), '4.2.2', true);
         wp_enqueue_script('imagesloaded', 'https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js', array('jquery'), '5.0.0', true);
+        // Add Plyr for single project gallery
+        if (is_singular('project_gallery')) {
+            wp_enqueue_style('plyr', 'https://cdn.plyr.io/3.7.8/plyr.css');
+            wp_enqueue_script('plyr', 'https://cdn.plyr.io/3.7.8/plyr.polyfilled.js', array(), '3.7.8', true);
+        }
+
+        // Lightbox scripts
         wp_enqueue_script('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js', array(), '3.2.0', true);
         wp_enqueue_style('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/css/glightbox.min.css');
-        wp_enqueue_script('gallery-lightbox', get_template_directory_uri() . '/assets/js/gallery-lightbox.js', array('glightbox'), '1.0', true);
         
+        if (is_singular('project_gallery')) {
+            wp_enqueue_script('gallery-lightbox', get_template_directory_uri() . '/assets/js/gallery-lightbox.js', array('glightbox', 'plyr'), '1.0', true);
+            wp_enqueue_script('plyr-init', get_template_directory_uri() . '/assets/js/plyr-init.js', array('plyr'), '1.0', true);
+        }
         
         // Gallery filters
         if (is_post_type_archive('project_gallery') || is_tax('project_tags') || is_page_template('page-templates/template-gallery.php')) {

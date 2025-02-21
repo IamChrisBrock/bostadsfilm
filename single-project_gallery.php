@@ -70,9 +70,9 @@ while (have_posts()) : the_post();
                             );
                             
                             if ($type === 'video') {
-                                // For videos, add the video to lightbox data but don't make it clickable
+                                // For videos, use video type
                                 $lightbox_attrs['data-type'] = 'video';
-                                $lightbox_attrs['data-video-url'] = esc_url($url);
+                                $lightbox_attrs['href'] = esc_url($url);
                                 if ($thumbnail) {
                                     $lightbox_attrs['data-poster'] = esc_url($thumbnail[0]);
                                 }
@@ -89,18 +89,16 @@ while (have_posts()) : the_post();
                             ?>
                             <a <?php echo $attrs; ?>>
                                 <?php if ($type === 'video') : ?>
-                                    <div class="video-wrapper">
-                                        <video 
-                                            controls 
-                                            preload="metadata"
-                                            <?php if ($thumbnail): ?>
-                                                poster="<?php echo esc_url($thumbnail[0]); ?>"
-                                            <?php endif; ?>
-                                            onloadedmetadata="if(!this.hasAttribute('poster')) this.currentTime = 1;">
-
-                                            <source src="<?php echo esc_url($url); ?>" type="<?php echo esc_attr($mime_type); ?>">
-                                        </video>
-                                    </div>
+                                   
+                                        <div class="plyr__video-embed js-player">
+                                            <video controls playsinline
+                                                <?php if ($thumbnail): ?>
+                                                    poster="<?php echo esc_url($thumbnail[0]); ?>"
+                                                <?php endif; ?>>
+                                                <source src="<?php echo esc_url($url); ?>" type="<?php echo esc_attr($mime_type); ?>">
+                                            </video>
+                                        </div>
+                                    
                                 <?php else : ?>
                                     <img src="<?php echo esc_url($thumbnail[0]); ?>" 
                                          alt="<?php echo esc_attr(get_post_meta($media_id, '_wp_attachment_image_alt', true)); ?>"
