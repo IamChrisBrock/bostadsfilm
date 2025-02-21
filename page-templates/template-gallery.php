@@ -15,16 +15,18 @@ $order = get_post_meta(get_the_ID(), '_gallery_order', true) ?: 'DESC';
 $orderby = get_post_meta(get_the_ID(), '_gallery_orderby', true) ?: 'date';
 
 // Query for project galleries
+$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 $gallery_query = new WP_Query(array(
     'post_type' => 'project_gallery',
-    'posts_per_page' => $posts_per_page,
+    'posts_per_page' => -1, // Show all posts
     'orderby' => $orderby,
-    'order' => $order
+    'order' => $order,
+    'paged' => $paged
 ));
 
 while (have_posts()) : the_post(); ?>
 
-<header class="full-window-header single-gallery-header">
+<header class="full-window-header portfolio-gallery-header">
     <div class="header-content">
         <h1 class="single-gallery-title"><?php the_title(); ?></h1>
         <?php if (has_excerpt()) : ?>
@@ -32,7 +34,9 @@ while (have_posts()) : the_post(); ?>
                 <?php the_excerpt(); ?>
             </div>
         <?php endif; ?>
+        <div class="portfolio-gallery-text">
         <?php the_content(); ?>
+        </div>
     </div>
     <?php if (has_post_thumbnail()) : ?>
         <div class="header-background">
@@ -63,18 +67,7 @@ while (have_posts()) : the_post(); ?>
                ?>
                 </div>
                 
-                <?php if ($posts_per_page != -1) : ?>
-                    <div class="gallery-pagination">
-                        <?php 
-                        echo paginate_links(array(
-                            'total' => $gallery_query->max_num_pages,
-                            'current' => max(1, get_query_var('paged')),
-                            'prev_text' => __('Previous', 'filmestate'),
-                            'next_text' => __('Next', 'filmestate'),
-                        ));
-                        ?>
-                    </div>
-                <?php endif; ?>
+
                 
             <?php else : ?>
                 <p class="no-galleries"><?php _e('No galleries found.', 'filmestate'); ?></p>

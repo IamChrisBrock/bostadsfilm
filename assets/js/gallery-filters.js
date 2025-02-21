@@ -56,7 +56,6 @@
             });
             
             this.initEvents();
-            this.initInfiniteScroll();
         }
 
         initEvents() {
@@ -74,18 +73,6 @@
             });
         }
 
-        initInfiniteScroll() {
-            $(window).on('scroll', () => {
-                if (this.isLoading) return;
-
-                const scrollPos = $(window).scrollTop() + $(window).height();
-                const triggerPos = $(document).height() - 200;
-
-                if (scrollPos > triggerPos) {
-                    this.loadMoreGalleries();
-                }
-            });
-        }
 
         updateFilters() {
             this.isLoading = true;
@@ -176,10 +163,7 @@
             });
         }
 
-        loadMoreGalleries() {
-            this.currentPage++;
-            this.updateFilters();
-        }
+
     }
 
     // Initialize on document ready

@@ -171,7 +171,8 @@ function get_gallery_tags() {
         INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
         WHERE tt.taxonomy = %s
         AND p.post_type = %s
-        AND p.post_status = 'publish'",
+        AND p.post_status = 'publish'
+        ORDER BY t.name ASC",
         'project_tags',
         'project_gallery'
     );

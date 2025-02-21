@@ -1,4 +1,6 @@
 <?php
+error_log('Loading single.php template');
+
 get_header();
 
 if ( have_posts() ) : 
