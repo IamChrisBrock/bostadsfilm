@@ -214,8 +214,8 @@ function add_gallery_filter_ui() {
         ?>
         <div class="gallery-filters">
             <div class="container">
-                <div class="filter-wrapper">
-                    <div class="filter-tags">
+                <div class="filter-wrapper row">
+                    <div class="filter-tags col-md-12 col-lg-6">
                         <h3><?php _e('Filter by Tags', 'filmestate'); ?></h3>
                         <div class="tag-list">
                             <?php foreach ($tags as $tag) : ?>
@@ -225,14 +225,16 @@ function add_gallery_filter_ui() {
                                            value="<?php echo esc_attr($tag['slug']); ?>"
                                            <?php checked(in_array($tag['slug'], $selected_tags)); ?>>
                                     <span class="tag-name"><?php echo esc_html($tag['name']); ?></span>
-                                    <span class="tag-count">(<?php echo esc_html($tag['count']); ?>)</span>
+                                    <span class="tag-count"><?php echo esc_html($tag['count']); ?></span>
                                 </label>
                             <?php endforeach; ?>
                         </div>
                     </div>
                     
-                    <div class="filter-sort">
-                        <select name="orderby" class="orderby-select">
+                    <div class="filter-sort col-md-12 col-lg-6">
+                        <h3><?php _e('Sort Galleries', 'filmestate'); ?></h3>
+                        <div class="sort-controls">
+                            <select name="orderby" class="orderby-select form-select">
                             <option value="date" <?php selected(isset($_GET['orderby']) ? $_GET['orderby'] : '', 'date'); ?>>
                                 <?php _e('Sort by Date', 'filmestate'); ?>
                             </option>
