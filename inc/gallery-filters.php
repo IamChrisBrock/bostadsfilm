@@ -18,17 +18,20 @@ function modify_gallery_query($query) {
          (is_page_template('page-templates/template-gallery.php') && $query->is_main_query()))) {
         
         // Handle tag filtering from URL parameters
-        $selected_tags = isset($_GET['gallery_tags']) ? explode(',', sanitize_text_field($_GET['gallery_tags'])) : array();
-        
-        if (!empty($selected_tags)) {
-            $query->set('tax_query', array(
-                array(
-                    'taxonomy' => 'project_tags',
-                    'field'    => 'slug',
-                    'terms'    => $selected_tags,
-                    'operator' => 'AND', // Require all selected tags
-                )
-            ));
+        if (isset($_GET['gallery_tags']) && !empty($_GET['gallery_tags'])) {
+            $selected_tags = array_filter(explode(',', sanitize_text_field($_GET['gallery_tags'])));
+            
+            if (!empty($selected_tags)) {
+                $query->set('tax_query', array(
+                    array(
+                        'taxonomy' => 'project_tags',
+                        'field'    => 'slug',
+                        'terms'    => $selected_tags,
+                        'operator' => 'IN', // Show posts with any of the selected tags
+                    )
+                ));
+            }
+        }
         }
 
         // Apply sorting
@@ -38,7 +41,6 @@ function modify_gallery_query($query) {
         $query->set('orderby', $orderby);
         $query->set('order', $order);
     }
-}
 add_action('pre_get_posts', 'modify_gallery_query');
 
 /**
@@ -68,7 +70,7 @@ function filter_galleries() {
                 'taxonomy' => 'project_tags',
                 'field'    => 'slug',
                 'terms'    => $tags,
-                'operator' => 'AND',
+                'operator' => 'IN', // Changed to IN for OR logic
             )
         );
     }
@@ -215,9 +217,12 @@ function add_gallery_filter_ui() {
         ?>
         <div class="gallery-filters">
             <div class="container">
-                <div class="filter-wrapper row">
+                <div class="filter-wrapper row align-items-center">
                     <div class="filter-tags col-md-12 col-lg-6">
-                        <h3><?php _e('Filter by Tags', 'filmestate'); ?></h3>
+                        <div class="filter-header">
+                            <h3><?php _e('Filter by Tags', 'filmestate'); ?></h3>
+                            
+                        </div>
                         <div class="tag-list">
                             <?php foreach ($tags as $tag) : ?>
                                 <label class="tag-item">
@@ -227,13 +232,16 @@ function add_gallery_filter_ui() {
                                            <?php checked(in_array($tag['slug'], $selected_tags)); ?>>
                                     <span class="tag-name"><?php echo esc_html($tag['name']); ?></span>
                                     <span class="tag-count"><?php echo esc_html($tag['count']); ?></span>
+                                    
                                 </label>
                             <?php endforeach; ?>
+                           
                         </div>
+                       
                     </div>
                     
-                    <div class="filter-sort col-md-12 col-lg-6">
-                        <h3><?php _e('Sort Galleries', 'filmestate'); ?></h3>
+                    
+                    <div class="filter-sort col-md-12 col-lg-4">
                         <div class="sort-controls">
                             <select name="orderby" class="orderby-select form-select">
                             <option value="date" <?php selected(isset($_GET['orderby']) ? $_GET['orderby'] : '', 'date'); ?>>
@@ -254,6 +262,13 @@ function add_gallery_filter_ui() {
                         </select>
                     </div>
                 </div>
+                <div class="filter-reset col-md-12 col-lg-2">
+                    <div class="filter-reset-wrapper">
+                            <button type="button" class="reset-filters btn btn-outline-secondary btn-sm">
+                                <?php _e('Reset Filters', 'filmestate'); ?>
+                            </button>
+                        </div>
+                    </div>
             </div>
         </div>
         <?php

@@ -109,8 +109,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // PAGE PRE LOADER
 document.addEventListener("DOMContentLoaded", function () {
-    window.addEventListener("load", function () {
-        document.getElementById("preloader").classList.add("hidden-preloader");
-    });
+    // Hide preloader after DOM is ready or after 2 seconds, whichever comes first
+    const hidePreloader = () => {
+        const preloader = document.getElementById("preloader");
+        if (preloader) {
+            preloader.classList.add("hidden-preloader");
+        }
+    };
+
+    // Set a maximum time to show preloader
+    setTimeout(hidePreloader, 2000);
+
+    // Also hide when everything is loaded
+    window.addEventListener("load", hidePreloader);
 });
 

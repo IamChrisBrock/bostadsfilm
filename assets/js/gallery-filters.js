@@ -59,6 +59,8 @@
         }
 
         initEvents() {
+            console.log('Initializing events');
+            
             // Handle tag selection
             this.filterForm.find('input[type="checkbox"]').on('change', () => {
                 this.currentPage = 1;
@@ -68,6 +70,21 @@
             // Handle sorting changes
             this.filterForm.find('.orderby-select, .order-select').on('change', (e) => {
                 console.log('Sort change:', e.target.name, e.target.value);
+                this.currentPage = 1;
+                this.updateFilters();
+            });
+
+            // Handle reset button click - using event delegation
+            $(document).on('click', '.reset-filters', () => {
+                console.log('Reset button clicked');
+                // Uncheck all checkboxes
+                this.filterForm.find('input[type="checkbox"]').prop('checked', false);
+                
+                // Reset sorting to defaults
+                this.filterForm.find('select[name="orderby"]').val('date');
+                this.filterForm.find('select[name="order"]').val('DESC');
+                
+                // Reset page and update
                 this.currentPage = 1;
                 this.updateFilters();
             });
@@ -90,7 +107,14 @@
 
             // Update URL
             const params = new URLSearchParams(window.location.search);
-            params.set('gallery_tags', selectedTags.join(','));
+            
+            // Only set gallery_tags if we have selected tags
+            if (selectedTags.length > 0) {
+                params.set('gallery_tags', selectedTags.join(','));
+            } else {
+                params.delete('gallery_tags');
+            }
+            
             params.set('orderby', orderby);
             params.set('order', order);
             params.set('page', this.currentPage);

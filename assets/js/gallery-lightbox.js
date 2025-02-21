@@ -1,23 +1,67 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Plyr for grid videos
-    const gridVideos = document.querySelectorAll('.js-player:not(.plyr--setup)');
-    gridVideos.forEach(video => {
-        if (!video.classList.contains('plyr--setup')) {
-            new Plyr(video, {
-                controls: [
-                    'play-large',
-                    'play',
-                    'progress',
-                    'current-time',
-                    'mute',
-                    'volume',
-                    'fullscreen'
-                ],
-                hideControls: false
-            });
-            video.classList.add('plyr--setup');
-        }
+    // Lazy load gallery items
+    const galleryItems = document.querySelectorAll('.single-gallery-item');
+    
+    const itemObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const item = entry.target;
+                const media = item.querySelector('img, video');
+
+                if (media) {
+                    // Set loading attribute for native lazy loading
+                    media.loading = 'lazy';
+
+                    const loadHandler = () => {
+                        requestAnimationFrame(() => {
+                            item.classList.add('loaded');
+                        });
+                    };
+
+                    // For images
+                    if (media.tagName === 'IMG') {
+                        if (media.complete) {
+                            loadHandler();
+                        } else {
+                            media.addEventListener('load', loadHandler);
+                        }
+                    }
+                    // For videos
+                    else if (media.tagName === 'VIDEO') {
+                        const video = media;
+                        if (!video.classList.contains('plyr--setup')) {
+                            new Plyr(video, {
+                                controls: [
+                                    'play-large',
+                                    'play',
+                                    'progress',
+                                    'current-time',
+                                    'mute',
+                                    'volume',
+                                    'fullscreen'
+                                ],
+                                hideControls: false
+                            });
+                            video.classList.add('plyr--setup');
+                        }
+                        // Videos might take time to load metadata
+                        if (video.readyState >= 1) {
+                            loadHandler();
+                        } else {
+                            video.addEventListener('loadedmetadata', loadHandler);
+                        }
+                    }
+                }
+
+                observer.unobserve(item);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '200px'
     });
+
+    galleryItems.forEach(item => itemObserver.observe(item));
 
     // Initialize GLightbox
     const lightbox = GLightbox({

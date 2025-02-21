@@ -70,12 +70,28 @@ while (have_posts()) : the_post();
                             );
                             
                             if ($type === 'video') {
-                                // For videos, use video type
+                                // For videos, render directly without lightbox wrapper
+                                ?>
+                                <video class="js-player" playsinline controls>
+                                    <source src="<?php echo esc_url($url); ?>" type="<?php echo esc_attr($mime_type); ?>">
+                                </video>
+                                <?php
+                                // Add hidden lightbox element for gallery sequence
+                                $lightbox_attrs['style'] = 'display: none;';
                                 $lightbox_attrs['data-type'] = 'video';
                                 $lightbox_attrs['href'] = esc_url($url);
+                                $lightbox_attrs['class'] = 'glightbox';
                                 if ($thumbnail) {
                                     $lightbox_attrs['data-poster'] = esc_url($thumbnail[0]);
                                 }
+                                echo '<a ' . implode(' ', array_map(
+                                    function($key) use ($lightbox_attrs) {
+                                        return $key . '="' . esc_attr($lightbox_attrs[$key]) . '"';
+                                    },
+                                    array_keys($lightbox_attrs)
+                                )) . '></a>';
+                                // Skip the regular link wrapper
+                                continue;
                             } else {
                                 // For images, make them open in lightbox
                                 $lightbox_attrs['href'] = esc_url($url);
