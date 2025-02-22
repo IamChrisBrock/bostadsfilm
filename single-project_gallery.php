@@ -86,9 +86,10 @@ while (have_posts()) : the_post();
                             );
                             
                             if ($type === 'video') {
-                                // For videos, render directly without lightbox wrapper
+                                // For videos, render with poster image
+                                $poster = $thumbnail ? $thumbnail[0] : '';
                                 ?>
-                                <video class="js-player" playsinline controls>
+                                <video class="js-player" playsinline controls poster="<?php echo esc_url($poster); ?>">
                                     <source src="<?php echo esc_url($url); ?>" type="<?php echo esc_attr($mime_type); ?>">
                                 </video>
                                 <?php
@@ -119,6 +120,7 @@ while (have_posts()) : the_post();
                                 <a <?php echo $attrs; ?>>
                                     <img src="<?php echo esc_url($thumbnail[0]); ?>" 
                                          alt="<?php echo esc_attr(get_post_meta($media_id, '_wp_attachment_image_alt', true)); ?>"
+                                         loading="lazy"
                                          class="img-fluid">
                                 </a>
                                 <?php
