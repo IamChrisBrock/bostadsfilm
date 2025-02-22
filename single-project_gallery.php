@@ -30,12 +30,28 @@ while (have_posts()) : the_post();
         </div>
     <?php endif; ?>
 </header>
+<div class="container back-link-wrapper">
+<?php
+    // Get the portfolio page URL
+    $portfolio_id = get_post_meta(get_the_ID(), '_portfolio_page_id', true);
+    $portfolio_url = $portfolio_id ? get_permalink($portfolio_id) : get_post_type_archive_link('project_gallery');
+?>
+
+    <a href="<?php echo esc_url($portfolio_url); ?>" class="back-link">
+    <div class="lottie-hover-link lottie-back-arrow" 
+             data-lottie-path="<?php echo get_template_directory_uri(); ?>/assets/lottie/back-arrow.json"
+             data-color="#ccc"
+             data-hover-color="#333"></div>
+        <span class="back-link-text"><?php _e('Back to Portfolio', 'filmestate'); ?></span>
+    </a>
+</div>
 <article id="post-<?php the_ID(); ?>" <?php post_class('single-gallery-view'); ?>>
     <?php
     $display_mode = get_post_meta(get_the_ID(), '_project_gallery_display_mode', true) ?: 'square';
     $container_class = $display_mode === 'full' ? 'container' : 'container';
     $gallery_class = 'single-gallery-grid mode-' . $display_mode;
     ?>
+    
     <div class="<?php echo esc_attr($container_class); ?>">
         <?php if (!empty($media_ids)) : ?>
             <div class="single-gallery-content">
@@ -90,41 +106,28 @@ while (have_posts()) : the_post();
                                     },
                                     array_keys($lightbox_attrs)
                                 )) . '></a>';
-                                // Skip the regular link wrapper
-                                continue;
                             } else {
                                 // For images, make them open in lightbox
                                 $lightbox_attrs['href'] = esc_url($url);
-                            }
-                            
-                            // Build attributes string
-                            $attrs = '';
-                            foreach ($lightbox_attrs as $key => $value) {
-                                $attrs .= ' ' . esc_attr($key) . '="' . esc_attr($value) . '"';
-                            }
-                            ?>
-                            <a <?php echo $attrs; ?>>
-                                <?php if ($type === 'video') : ?>
-                                   
-                                        <div class="plyr__video-embed js-player">
-                                            <video controls playsinline
-                                                <?php if ($thumbnail): ?>
-                                                    poster="<?php echo esc_url($thumbnail[0]); ?>"
-                                                <?php endif; ?>>
-                                                <source src="<?php echo esc_url($url); ?>" type="<?php echo esc_attr($mime_type); ?>">
-                                            </video>
-                                        </div>
-                                    
-                                <?php else : ?>
+                                
+                                // Build attributes string
+                                $attrs = '';
+                                foreach ($lightbox_attrs as $key => $value) {
+                                    $attrs .= ' ' . esc_attr($key) . '="' . esc_attr($value) . '"';
+                                }
+                                ?>
+                                <a <?php echo $attrs; ?>>
                                     <img src="<?php echo esc_url($thumbnail[0]); ?>" 
                                          alt="<?php echo esc_attr(get_post_meta($media_id, '_wp_attachment_image_alt', true)); ?>"
                                          class="img-fluid">
-                                <?php endif; ?>
-                            </a>
+                                </a>
+                                <?php
+                            }
+                            ?>
                         </div>
                     <?php endforeach; ?>
-                </div>
-            </div>
+                </div><!-- .gallery-class -->
+            </div><!-- .single-gallery-content -->
         <?php endif; ?>
 
         <div class="single-gallery-footer">
@@ -135,6 +138,12 @@ while (have_posts()) : the_post();
 
 <?php
 endwhile;
+
+get_footer();
+?>
+
+get_footer();
+?>
 
 get_footer();
 ?>

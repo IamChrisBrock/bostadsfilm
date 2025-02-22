@@ -101,6 +101,7 @@ function mytheme_enqueue_scripts() {
     
     // Load Lottie globally since it's used in multiple places
     wp_enqueue_script('lottie-js', 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js', array(), '5.12.2', true);
+    wp_enqueue_script('lottie-link-js', get_template_directory_uri() . '/assets/js/lottie-link.js', array('lottie-js'), '1.0', true);
 
 
     // Gallery scripts and styles
@@ -117,7 +118,7 @@ function mytheme_enqueue_scripts() {
         wp_enqueue_style('glightbox', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/css/glightbox.min.css');
         
         if (is_singular('project_gallery')) {
-            wp_enqueue_script('gallery-lightbox', get_template_directory_uri() . '/assets/js/gallery-lightbox.js', array('glightbox', 'plyr'), '1.0', true);
+            wp_enqueue_script('gallery-lightbox', get_template_directory_uri() . '/assets/js/gallery-js.js', array('glightbox', 'plyr'), '1.0', true);
             wp_enqueue_script('plyr-init', get_template_directory_uri() . '/assets/js/plyr-init.js', array('plyr'), '1.0', true);
         }
         

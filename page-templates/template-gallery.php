@@ -4,26 +4,9 @@
  * Description: A template for displaying project galleries in a customizable grid layout
  */
 
-use Inkperial\Components\Gallery_Item;
-
 get_header();
 
-// Get display options (can be customized via ACF or page meta)
-$posts_per_page = get_post_meta(get_the_ID(), '_gallery_posts_per_page', true) ?: -1;
-$columns = get_post_meta(get_the_ID(), '_gallery_columns', true) ?: 3;
-$order = get_post_meta(get_the_ID(), '_gallery_order', true) ?: 'DESC';
-$orderby = get_post_meta(get_the_ID(), '_gallery_orderby', true) ?: 'date';
-
-// Query for project galleries
-$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-$gallery_query = new WP_Query(array(
-    'post_type' => 'project_gallery',
-    'posts_per_page' => -1, // Show all posts
-    'orderby' => $orderby,
-    'order' => $order,
-    'paged' => $paged
-));
-
+// Get the page content first
 while (have_posts()) : the_post(); ?>
 
 <header class="full-window-header portfolio-gallery-header">
@@ -46,36 +29,31 @@ while (have_posts()) : the_post(); ?>
     <?php endif; ?>
 </header>
 
-<?php endwhile; ?>
+<?php endwhile; 
 
-<div class="gallery-page">
-    <?php 
-    // Add filter UI
-    if (function_exists('add_gallery_filter_ui')) {
-        add_gallery_filter_ui();
-    }
-    ?>
-    
-    <div class="gallery-page-content">
-        <div class="container">
-            <?php if ($gallery_query->have_posts()) : ?>
-                <div class="row gallery-grid columns-<?php echo esc_attr($columns); ?>">
-                    <?php while ($gallery_query->have_posts()) : $gallery_query->the_post(); 
-                        $gallery_item = new Gallery_Item(get_post());
-                        $gallery_item->render();
-                    endwhile; 
-               ?>
-                </div>
-                
+// Query for project galleries
+$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+$orderby = get_post_meta(get_the_ID(), '_gallery_orderby', true) ?: 'date';
+$order = get_post_meta(get_the_ID(), '_gallery_order', true) ?: 'DESC';
 
-                
-            <?php else : ?>
-                <p class="no-galleries"><?php _e('No galleries found.', 'filmestate'); ?></p>
-            <?php endif; 
-            wp_reset_postdata(); 
-            ?>
-        </div>
-    </div>
-</div>
+$gallery_query = new WP_Query(array(
+    'post_type' => 'project_gallery',
+    'posts_per_page' => -1,
+    'orderby' => $orderby,
+    'order' => $order,
+    'paged' => $paged
+));
 
-<?php get_footer(); ?>
+// Setup the query for the gallery grid
+global $wp_query;
+$main_query = $wp_query;
+$wp_query = $gallery_query;
+
+// Include the shared gallery grid template
+get_template_part('template-parts/gallery-grid');
+
+// Restore the main query
+$wp_query = $main_query;
+wp_reset_postdata();
+
+ get_footer(); ?>

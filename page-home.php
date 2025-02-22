@@ -71,7 +71,7 @@ while ($services->have_posts()):
     // HTML for portfolio link
     $portfolio_link = '
         <div class="container portfolio-link-container">
-        <a class="portfolio-link '.$link_color_class.'" href="">
+        <a class="portfolio-link '.$link_color_class.'" href="portfolio">
             <div class="row">
             <div class="col-auto">
             

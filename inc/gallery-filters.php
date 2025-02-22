@@ -271,6 +271,7 @@ function add_gallery_filter_ui() {
                     </div>
             </div>
         </div>
+        </div>
         <?php
     }
 }
