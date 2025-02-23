@@ -4,7 +4,23 @@
  * Description: A template for displaying project galleries in a customizable grid layout
  */
 
+// Get thumbnail style
+$thumbnail_style = get_post_meta(get_the_ID(), '_gallery_thumbnail_style', true) ?: '16:9';
+
+// Add thumbnail style class to body
+add_filter('body_class', function($classes) use ($thumbnail_style) {
+    if ($thumbnail_style === 'square') {
+        $classes[] = 'thumbnail-style-square';
+    }
+    return $classes;
+});
+
 get_header();
+
+// Enqueue gallery scripts
+wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery'), null, true);
+wp_enqueue_script('gallery-lazy-load', get_template_directory_uri() . '/assets/js/gallery-lazy-load.js', array('jquery'), null, true);
+wp_enqueue_script('gallery-lightbox', get_template_directory_uri() . '/assets/js/gallery-lightbox.js', array('jquery'), null, true);
 
 // Get the page content first
 while (have_posts()) : the_post(); ?>
@@ -56,4 +72,26 @@ get_template_part('template-parts/gallery-grid');
 $wp_query = $main_query;
 wp_reset_postdata();
 
- get_footer(); ?>
+// Add gallery initialization script
+?>
+<script>
+jQuery(document).ready(function($) {
+    // Initialize gallery filters if they exist
+    if (typeof initGalleryFilters === 'function') {
+        initGalleryFilters();
+    }
+    
+    // Initialize lazy loading
+    if (typeof initGalleryLazyLoad === 'function') {
+        initGalleryLazyLoad();
+    }
+    
+    // Initialize lightbox
+    if (typeof initGalleryLightbox === 'function') {
+        initGalleryLightbox();
+    }
+});
+</script>
+
+<?php
+get_footer();

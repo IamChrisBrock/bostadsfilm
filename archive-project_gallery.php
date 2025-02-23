@@ -26,6 +26,3 @@ $archive_description = get_the_archive_description();
 get_template_part('template-parts/gallery-grid');
 
 get_footer();
-?>
-
-<?php get_footer(); ?>

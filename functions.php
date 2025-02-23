@@ -52,6 +52,10 @@ function mytheme_enqueue_css() {
         is_singular('project_gallery') || 
         is_page_template('page-templates/template-gallery.php')) {
         wp_enqueue_style('project-galleries', get_template_directory_uri() . '/assets/css/project-galleries.css');
+        wp_enqueue_script('masonry-js', 'https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js', array('jquery'), '4.2.2', true);
+        wp_enqueue_script('imagesloaded', 'https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js', array('jquery'), '5.0.0', true);
+        wp_enqueue_script('masonry-init', get_template_directory_uri() . '/assets/js/masonry-init.js', array('jquery', 'masonry-js', 'imagesloaded'), null, true);
+        wp_enqueue_script('info-boxes', get_template_directory_uri() . '/assets/js/info-boxes.js', array('jquery'), null, true);
         wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery', 'lottie-js'), null, true);
         wp_enqueue_script('header-animations', get_template_directory_uri() . '/assets/js/header-animations.js', array('jquery'), null, true);
     }
@@ -97,10 +101,10 @@ add_filter('template_include', 'force_project_gallery_template');
 function mytheme_enqueue_scripts() {
     wp_enqueue_style('mytheme-style', get_stylesheet_uri());
     wp_enqueue_script('fade-in-script', get_template_directory_uri() . '/assets/js/section-observer-fade-in.js', array(), false, true);
-    wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js');
+    wp_enqueue_script('main-js', get_template_directory_uri() . '/assets/js/main.js', array('jquery'), '1.0', true);
     
     // Load Lottie globally since it's used in multiple places
-    wp_enqueue_script('lottie-js', 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js', array(), '5.12.2', true);
+    wp_enqueue_script('lottie-js', 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js', array(), '5.12.2', false);
     wp_enqueue_script('lottie-link-js', get_template_directory_uri() . '/assets/js/lottie-link.js', array('lottie-js'), '1.0', true);
 
 
@@ -184,6 +188,7 @@ function my_dynamic_colors() {
             --secondary-link-color: $secondary_link_color;
             --secondary-link-hover-color: $secondary_link_hover_color;
             --highlight-color: $highlight_color;
+        
         }
 
         body {
@@ -335,8 +340,8 @@ function add_menu_body_classes($classes) {
         $classes[] = 'transparent-background';
     }
 
-    // Add menu-dynamic class if set
-    if ($menu_style === 'dynamic') {
+    // Add menu-dynamic class if set in meta or if it's the project gallery archive
+    if ($menu_style === 'dynamic' || is_post_type_archive('project_gallery')) {
         $classes[] = 'menu-dynamic';
     }
 
@@ -418,10 +423,100 @@ add_action('wp_enqueue_scripts', 'custom_google_fonts');
 
 // Customizers
 function my_theme_customizer( $wp_customize ) {
-    // Footer Background Image
+    // Contact Information Section
+    $wp_customize->add_section('contact_info_section', array(
+        'title'    => __('Contact Information', 'filmestate'),
+        'priority' => 30,
+    ));
+
+    // Company Name Setting
+    $wp_customize->add_setting('company_name', array(
+        'default'   => get_bloginfo('name'),
+        'transport' => 'refresh',
+        'sanitize_callback' => 'sanitize_text_field'
+    ));
+
+    $wp_customize->add_control('company_name', array(
+        'label'    => __('Company Name', 'filmestate'),
+        'section'  => 'contact_info_section',
+        'type'     => 'text',
+    ));
+
+    // Address Setting
+    $wp_customize->add_setting('footer_address', array(
+        'default'   => 'Your Address Here',
+        'transport' => 'refresh',
+        'sanitize_callback' => 'sanitize_textarea_field'
+    ));
+
+    $wp_customize->add_control('footer_address', array(
+        'label'    => __('Address', 'filmestate'),
+        'section'  => 'contact_info_section',
+        'type'     => 'textarea',
+    ));
+
+    // Phone Setting
+    $wp_customize->add_setting('footer_phone', array(
+        'default'   => '+46 14851 91 91',
+        'transport' => 'refresh',
+        'sanitize_callback' => 'sanitize_text_field'
+    ));
+
+    $wp_customize->add_control('footer_phone', array(
+        'label'    => __('Phone Number', 'filmestate'),
+        'section'  => 'contact_info_section',
+        'type'     => 'text',
+    ));
+
+    // Email Setting
+    $wp_customize->add_setting('footer_email', array(
+        'default'   => 'contact@example.com',
+        'transport' => 'refresh',
+        'sanitize_callback' => 'sanitize_email'
+    ));
+
+    $wp_customize->add_control('footer_email', array(
+        'label'    => __('Email Address', 'filmestate'),
+        'section'  => 'contact_info_section',
+        'type'     => 'email',
+    ));
+
+    // Footer Settings Section
     $wp_customize->add_section('footer_section', array(
         'title'    => 'Footer Settings',
         'priority' => 30,
+    ));
+
+    // Footer Logo
+    $wp_customize->add_setting('footer_logo', array(
+        'default'   => '',
+        'transport' => 'refresh',
+        'sanitize_callback' => 'absint'
+    ));
+
+    $wp_customize->add_control(new WP_Customize_Media_Control($wp_customize, 'footer_logo', array(
+        'label'     => __('Footer Logo', 'filmestate'),
+        'section'   => 'footer_section',
+        'mime_type' => 'image',
+        'description' => __('Select an image to be used as the footer logo.', 'filmestate'),
+    )));
+
+    // Footer Logo Width
+    $wp_customize->add_setting('footer_logo_width', array(
+        'default'           => '150',
+        'transport'         => 'refresh',
+        'sanitize_callback' => 'absint'
+    ));
+
+    $wp_customize->add_control('footer_logo_width', array(
+        'label'       => __('Footer Logo Width (px)', 'filmestate'),
+        'section'     => 'footer_section',
+        'type'        => 'number',
+        'input_attrs' => array(
+            'min'  => 50,
+            'max'  => 500,
+            'step' => 10
+        )
     ));
 
     $wp_customize->add_setting('footer_background_image', array(
@@ -1556,7 +1651,7 @@ function custom_contact_form7() {
         <section id="get-in-touch">
         
         
-        <div class="custom-contact-form fade-in-bottom" style="background-color: ' . esc_attr($primary_bg_color) . '; color: ' . esc_attr($primary_text_color) . ';">
+        <div class="custom-contact-form" style="background-color: ' . esc_attr($primary_bg_color) . '; color: ' . esc_attr($primary_text_color) . ';">
             <h2 class="form-headline">' . esc_html($headline) . '</h2>
             <p  class="form-subtext">' . esc_html($subtext) . '</p>
             ' . do_shortcode('[contact-form-7 id="' . $form->ID . '" title="' . $form_title . '"]') . '

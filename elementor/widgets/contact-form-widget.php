@@ -131,7 +131,7 @@ class Contact_Form_Widget extends \Elementor\Widget_Base {
             $form = $form[0];
             ?>
             <section class="contact-section">
-                <div class="custom-contact-form<?php echo $is_edit_mode ? '' : ' fade-in-bottom'; ?>">
+                <div class="custom-contact-form">
                     <h2 class="form-headline"><?php echo esc_html($settings['headline']); ?></h2>
                     <p class="form-subtext"><?php echo esc_html($settings['subtext']); ?></p>
                     <?php echo do_shortcode('[contact-form-7 id="' . $form->ID . '" title="' . $form->post_title . '"]'); ?>

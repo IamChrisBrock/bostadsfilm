@@ -2,7 +2,13 @@
 .main_menu_nav_container{
     padding: 25px;    
 }
-.main_menu_logo{
+.main_menu_logo_link {
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.main_menu_logo {
     height:50px;
     float:left;
 }

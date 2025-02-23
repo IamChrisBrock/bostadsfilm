@@ -4,6 +4,9 @@
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-url" content="<?php echo esc_attr(get_template_directory_uri()); ?>">
+    
+    <!-- Load Lottie first for preloader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
     <?php wp_head(); ?>
 </head>
@@ -15,9 +18,30 @@ echo '<!-- Body Classes: ' . implode(' ', $debug_classes) . ' -->';
 <body <?php body_class(); ?>>
 <div id="preloader">
     <div class="loader">
-    <?php echo do_shortcode('[lottie file="' . get_template_directory_uri() .'/assets/lottie/loading-house.json" width="60px" height="60px"]');?>
+        <div id="preloader-animation" style="width: 60px; height: 60px;"></div>
     </div>
 </div>
+<script>
+(function() {
+    var initAnimation = function() {
+        if (typeof lottie === 'undefined') {
+            setTimeout(initAnimation, 50);
+            return;
+        }
+        var container = document.getElementById('preloader-animation');
+        if (!container) return;
+
+        lottie.loadAnimation({
+            container: container,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: '<?php echo get_template_directory_uri(); ?>/assets/lottie/loading-house.json'
+        });
+    };
+    initAnimation();
+})();
+</script>
 
 <header>
     
@@ -59,6 +83,8 @@ if (in_array('transparent-background', $body_classes)) {
                 $svg = preg_replace('/stroke="[^"]*"/', 'stroke="currentColor"', $svg);
                 // Add fill to elements that might not have them
                 $svg = str_replace('<path', '<path fill="currentColor"', $svg);
+                // Wrap SVG in a link
+                $svg = '<a href="' . esc_url(home_url('/')) . '" class="main_menu_logo_link">' . $svg . '</a>';
                 $svg = str_replace('<rect', '<rect fill="currentColor"', $svg);
                 $svg = str_replace('<circle', '<circle fill="currentColor"', $svg);
                 $svg = str_replace('<polygon', '<polygon fill="currentColor"', $svg);

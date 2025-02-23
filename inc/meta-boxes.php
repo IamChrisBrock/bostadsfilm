@@ -28,6 +28,15 @@ function register_project_gallery_meta_boxes() {
         'side',
         'high'
     );
+
+    add_meta_box(
+        'project_gallery_info_boxes',
+        __('Project Info Boxes', 'filmestate'),
+        'render_project_gallery_info_boxes',
+        'project_gallery',
+        'normal',
+        'high'
+    );
 }
 
 /**
@@ -244,6 +253,10 @@ function render_project_gallery_display_mode_box($post) {
         <label>
             <input type="radio" name="project_gallery_display_mode" value="masonry" <?php checked($display_mode, 'masonry'); ?>>
             <i class="fas fa-th-large"></i> <?php _e('Masonry Grid', 'filmestate'); ?>
+        </label><br>
+        <label>
+            <input type="radio" name="project_gallery_display_mode" value="pinterest" <?php checked($display_mode, 'pinterest'); ?>>
+            <i class="fab fa-pinterest"></i> <?php _e('Pinterest Style', 'filmestate'); ?>
         </label>
     </div>
     <style>
@@ -286,3 +299,115 @@ function save_project_gallery_display_mode($post_id) {
     }
 }
 add_action('save_post_project_gallery', 'save_project_gallery_display_mode');
+
+/**
+ * Render the info boxes meta box
+ */
+function render_project_gallery_info_boxes($post) {
+    wp_nonce_field('project_gallery_info_boxes_nonce', 'project_gallery_info_boxes_nonce');
+
+    // Get saved values
+    $info_boxes = array();
+    for ($i = 1; $i <= 3; $i++) {
+        $info_boxes[$i] = array(
+            'headline' => get_post_meta($post->ID, '_project_gallery_info_box_' . $i . '_headline', true),
+            'content' => get_post_meta($post->ID, '_project_gallery_info_box_' . $i . '_content', true)
+        );
+    }
+    ?>
+    <div class="info-boxes-wrapper">
+        <div class="info-boxes-grid">
+            <?php for ($i = 1; $i <= 3; $i++) : ?>
+                <div class="info-box-section">
+                    <h4><?php printf(__('Info Box %d', 'filmestate'), $i); ?></h4>
+                    <p>
+                        <label for="project_gallery_info_box_<?php echo $i; ?>_headline"><?php _e('Headline:', 'filmestate'); ?></label>
+                        <input type="text" id="project_gallery_info_box_<?php echo $i; ?>_headline" 
+                               name="project_gallery_info_box_<?php echo $i; ?>_headline" 
+                               value="<?php echo esc_attr($info_boxes[$i]['headline']); ?>" 
+                               class="widefat">
+                    </p>
+                    <p>
+                        <label for="project_gallery_info_box_<?php echo $i; ?>_content"><?php _e('Content:', 'filmestate'); ?></label>
+                        <textarea id="project_gallery_info_box_<?php echo $i; ?>_content" 
+                                  name="project_gallery_info_box_<?php echo $i; ?>_content" 
+                                  class="widefat" rows="4"><?php echo esc_textarea($info_boxes[$i]['content']); ?></textarea>
+                    </p>
+                </div>
+            <?php endfor; ?>
+        </div>
+    </div>
+    <style>
+        .info-boxes-wrapper {
+            padding: 10px;
+            margin: -6px -12px -12px;
+        }
+        .info-boxes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .info-box-section {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 3px;
+            padding: 15px;
+        }
+        .info-box-section h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        @media screen and (max-width: 1200px) {
+            .info-boxes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media screen and (max-width: 782px) {
+            .info-boxes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <?php
+}
+
+/**
+ * Save the info boxes meta box data
+ */
+function save_project_gallery_info_boxes($post_id) {
+    // Check if our nonce is set
+    if (!isset($_POST['project_gallery_info_boxes_nonce'])) {
+        return;
+    }
+
+    // Verify that the nonce is valid
+    if (!wp_verify_nonce($_POST['project_gallery_info_boxes_nonce'], 'project_gallery_info_boxes_nonce')) {
+        return;
+    }
+
+    // If this is an autosave, our form has not been submitted, so we don't want to do anything
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    // Check the user's permissions
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    // Save info boxes data
+    for ($i = 1; $i <= 3; $i++) {
+        $headline_key = 'project_gallery_info_box_' . $i . '_headline';
+        $content_key = 'project_gallery_info_box_' . $i . '_content';
+
+        if (isset($_POST[$headline_key])) {
+            update_post_meta($post_id, '_' . $headline_key, sanitize_text_field($_POST[$headline_key]));
+        }
+        if (isset($_POST[$content_key])) {
+            update_post_meta($post_id, '_' . $content_key, wp_kses_post($_POST[$content_key]));
+        }
+    }
+}
+add_action('save_post_project_gallery', 'save_project_gallery_info_boxes');

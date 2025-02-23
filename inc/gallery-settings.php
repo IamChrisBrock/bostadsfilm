@@ -40,6 +40,7 @@ function render_gallery_settings_meta_box($post) {
     $columns = get_post_meta($post->ID, '_gallery_columns', true) ?: 3;
     $order = get_post_meta($post->ID, '_gallery_order', true) ?: 'DESC';
     $orderby = get_post_meta($post->ID, '_gallery_orderby', true) ?: 'date';
+    $thumbnail_style = get_post_meta($post->ID, '_gallery_thumbnail_style', true) ?: '16:9';
     ?>
     <table class="form-table">
         <tr>
@@ -95,6 +96,18 @@ function render_gallery_settings_meta_box($post) {
                 </select>
             </td>
         </tr>
+        <tr>
+            <th scope="row">
+                <label for="gallery_thumbnail_style"><?php _e('Thumbnail Style', 'filmestate'); ?></label>
+            </th>
+            <td>
+                <select id="gallery_thumbnail_style" name="gallery_thumbnail_style">
+                    <option value="16:9" <?php selected($thumbnail_style, '16:9'); ?>><?php _e('16:9 Widescreen', 'filmestate'); ?></option>
+                    <option value="square" <?php selected($thumbnail_style, 'square'); ?>><?php _e('Square', 'filmestate'); ?></option>
+                </select>
+                <p class="description"><?php _e('Choose the aspect ratio for gallery thumbnails.', 'filmestate'); ?></p>
+            </td>
+        </tr>
     </table>
     <?php
 }
@@ -127,7 +140,8 @@ function save_gallery_settings_meta($post_id) {
         'gallery_posts_per_page' => 'intval',
         'gallery_columns' => 'intval',
         'gallery_order' => 'sanitize_text_field',
-        'gallery_orderby' => 'sanitize_text_field'
+        'gallery_orderby' => 'sanitize_text_field',
+        'gallery_thumbnail_style' => 'sanitize_text_field'
     );
 
     foreach ($fields as $field => $sanitize_callback) {

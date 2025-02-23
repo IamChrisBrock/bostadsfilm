@@ -114,7 +114,7 @@ $lottie_url = $lottie_file_id ? wp_get_attachment_url($lottie_file_id) : '';
 
 ?>
     
-    <div class="row service-post-container d-flex align-items-center <?php echo $color_theme_class;?>">
+    <div class="row service-post-container d-flex align-items-center fade-in-parent <?php echo $color_theme_class;?>">
     <div class="container">
     <?php if($is_first_service){?>
         <div class="row">
@@ -123,7 +123,7 @@ $lottie_url = $lottie_file_id ? wp_get_attachment_url($lottie_file_id) : '';
             echo $cpt_name;
     ?></h1></div></div><?php }?> 
         <div class="row">
-    <div class="col-12 col-xl-6 col-lg-4 hidden-for-observer <?php echo $service_order_class . " " . $service_text_wrapper_class;?> <?php echo ($layout === 'Left' ? 'fade-in-left' : 'fade-in-right')?>">
+    <div class="col-12 col-xl-6 col-lg-4 hidden-for-observer fade-in-item <?php echo $service_order_class . " " . $service_text_wrapper_class;?> <?php echo ($layout === 'Left' ? 'fade-in-left' : 'fade-in-right')?>">
     <div class="container">
     <div class="row">
    
@@ -143,7 +143,7 @@ $lottie_url = $lottie_file_id ? wp_get_attachment_url($lottie_file_id) : '';
     </div>
                     
     
-    <div class="col-12 col-xl-6 col-lg-8 hidden-for-observer <?php echo ($layout === 'Left' ? 'order-2' : 'order-1') . ' ' . $image_wrapper_class; ?> <?php echo ($layout === 'Left' ? 'fade-in-left' : 'fade-in-right')?>">
+    <div class="col-12 col-xl-6 col-lg-8 hidden-for-observer fade-in-item <?php echo ($layout === 'Left' ? 'order-2' : 'order-1') . ' ' . $image_wrapper_class; ?> <?php echo ($layout === 'Left' ? 'fade-in-left' : 'fade-in-right')?>">
         <div class="image-container zoom-effect">
                     <?php echo get_the_post_thumbnail();?>
          </div>

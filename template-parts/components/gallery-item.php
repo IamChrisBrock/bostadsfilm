@@ -21,7 +21,6 @@
                          class="img-fluid">
                     <?php if ($has_media) : ?>
                         <span class="media-count">
-                            <i class="fas fa-images"></i>
                             <?php echo esc_html($media_count); ?>
                         </span>
                     <?php endif; ?>
@@ -31,7 +30,6 @@
                     <?php echo get_the_post_thumbnail($post_id, 'large', array('class' => 'img-fluid')); ?>
                     <?php if ($has_media) : ?>
                         <span class="media-count">
-                            <i class="fas fa-images"></i>
                             <?php echo esc_html($media_count); ?>
                         </span>
                     <?php endif; ?>

@@ -16,11 +16,7 @@ while (have_posts()) : the_post();
 <header class="full-window-header single-gallery-header">
     <div class="header-content">
         <h1 class="single-gallery-title"><?php the_title(); ?></h1>
-        <?php if (has_excerpt()) : ?>
-            <div class="single-gallery-description">
-                <?php the_excerpt(); ?>
-            </div>
-        <?php endif; ?>
+       
 
     </div>
     <?php if (has_post_thumbnail()) : ?>
@@ -45,10 +41,46 @@ while (have_posts()) : the_post();
         <span class="back-link-text"><?php _e('Back to Portfolio', 'filmestate'); ?></span>
     </a>
 </div>
+
+<div class="container single-gallery-text">
+    <div class="row">
+        <div class="col-12">
+<div class="single-gallery-introduction-text">
+    <?php the_content(); ?>
+            </div>
+        </div>
+    </div>
+    <div class="row single-gallery-info-boxes">
+        <?php for ($i = 1; $i <= 3; $i++) : 
+            $headline = get_post_meta(get_the_ID(), '_project_gallery_info_box_' . $i . '_headline', true);
+            $content = get_post_meta(get_the_ID(), '_project_gallery_info_box_' . $i . '_content', true);
+            if (!empty($headline) || !empty($content)) :
+        ?>
+            <div class="col-12 col-md-4">
+                <div class="single-gallery-info-box" data-box="<?php echo $i; ?>">
+                    <div class="info-box-header">
+                        <h3><?php echo esc_html($headline); ?></h3>
+                        <span class="toggle-icon">+</span>
+                    </div>
+                    <div class="info-box-content">
+                        <div class="info-box-content-inner">
+                            <?php echo wpautop(wp_kses_post($content)); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php 
+            endif;
+        endfor; 
+        ?>
+    </div>
+</div>
+
+
 <article id="post-<?php the_ID(); ?>" <?php post_class('single-gallery-view'); ?>>
     <?php
     $display_mode = get_post_meta(get_the_ID(), '_project_gallery_display_mode', true) ?: 'square';
-    $container_class = $display_mode === 'full' ? 'container' : 'container';
+    $container_class = 'container';
     $gallery_class = 'single-gallery-grid mode-' . $display_mode;
     ?>
     
@@ -77,7 +109,7 @@ while (have_posts()) : the_post();
                             continue;
                         }
                     ?>
-                        <div class="single-gallery-item <?php echo $display_mode === 'full' ? 'full-width' : 'col-md-6 col-lg-4'; ?>" data-type="<?php echo esc_attr($type); ?>">
+                        <div class="single-gallery-item <?php echo $display_mode === 'full' ? 'full-width' : ''; ?>" data-type="<?php echo esc_attr($type); ?>">
                             <?php
                             // Always wrap in a lightbox link, but with different data attributes for video/image
                             $lightbox_attrs = array(
@@ -133,7 +165,7 @@ while (have_posts()) : the_post();
         <?php endif; ?>
 
         <div class="single-gallery-footer">
-            <?php the_content(); ?>
+           
         </div>
     </div>
 </article>

@@ -151,7 +151,7 @@ class Elementor_Statistics_Widget extends \Elementor\Widget_Base {
 
         if ($wp_query->have_posts()) :
             // Don't use fade-in classes in editor mode
-            $container_class = $is_edit_mode ? 'container' : 'container fade-in-top';
+            $container_class = $is_edit_mode ? 'container' : 'container fade-in-parent';
             echo '<div class="' . $container_class . '"><div class="row justify-content-center">';
 
             while ($wp_query->have_posts()) : $wp_query->the_post();
@@ -166,8 +166,8 @@ class Elementor_Statistics_Widget extends \Elementor\Widget_Base {
                 }
                 
                 // Remove all animation classes in editor mode
-                $col_class = $is_edit_mode ? 'col-12 col-md-4 col-lg' : 'col-12 col-md-4 col-lg fade-in-top';
-                $item_class = $is_edit_mode ? 'statistic-item text-center' : 'statistic-item text-center fade-in-top';
+                $col_class = 'col-12 col-md-4 col-lg fade-in-item fade-in-top';
+                $item_class = 'statistic-item text-center';
                 
                 echo '<div class="' . $col_class . '">';
                 echo '<div class="' . $item_class . '" data-post-id="' . $post_id . '">';

@@ -414,7 +414,7 @@ html body {
 .fade-in-top, .fade-in-bottom {
     opacity: 0;
     transform: translateY(-30px); 
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 .fade-in-bottom {
     transform: translateY(30px); 
@@ -422,7 +422,7 @@ html body {
 .fade-in-left, .fade-in-right {
     opacity: 0;
     transform: translateX(-30px); 
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 .fade-in-left {
     transform: translateX(30px); 
@@ -432,12 +432,21 @@ html body {
     opacity: 1;
     transform: translateX(0);
 }
-.fade-in-left:nth-child(1), .fade-in-right:nth-child(1),.fade-in-bottom:nth-child(1), .fade-in-top:nth-child(1) { transition-delay: 0.2s; }
-.fade-in-left:nth-child(2), .fade-in-right:nth-child(2),.fade-in-bottom:nth-child(2), .fade-in-top:nth-child(2) { transition-delay: 0.6s; }
-.fade-in-left:nth-child(3), .fade-in-right:nth-child(3),.fade-in-bottom:nth-child(3), .fade-in-top:nth-child(3) { transition-delay: 1s; }
-.fade-in-left:nth-child(4), .fade-in-right:nth-child(4),.fade-in-bottom:nth-child(4), .fade-in-top:nth-child(4) { transition-delay: 1.4s; }
-.fade-in-left:nth-child(5), .fade-in-right:nth-child(5),.fade-in-bottom:nth-child(5), .fade-in-top:nth-child(5) { transition-delay: 1.8s; }
-.fade-in-left:nth-child(6), .fade-in-right:nth-child(6),.fade-in-bottom:nth-child(6), .fade-in-top:nth-child(6) { transition-delay: 2.2s; }
+/* Parent container must have this class to enable child delays */
+.fade-in-parent .fade-in-item:nth-child(1) { transition-delay: 0.2s; }
+.fade-in-parent .fade-in-item:nth-child(2) { transition-delay: 0.4s; }
+.fade-in-parent .fade-in-item:nth-child(3) { transition-delay: 0.6s; }
+.fade-in-parent .fade-in-item:nth-child(4) { transition-delay: 0.8s; }
+.fade-in-parent .fade-in-item:nth-child(5) { transition-delay: 1.0s; }
+.fade-in-parent .fade-in-item:nth-child(6) { transition-delay: 1.2s; }
+
+/* Add fade-in-item class to all fade-in elements */
+.fade-in-left.fade-in-item,
+.fade-in-right.fade-in-item,
+.fade-in-top.fade-in-item,
+.fade-in-bottom.fade-in-item {
+    will-change: opacity, transform;
+}
 
 
 .hidden-for-observer {
@@ -446,15 +455,20 @@ html body {
 /*PAGE PRE LOADER */
 /* Fullscreen Loader */
 #preloader {
-    top:0;
+    top: 0;
+    left: 0;
     position: fixed;
     width: 100%;
-    height: 100%;
-    background: #272b24; /* Change this to match your design */
+    height: 100vh;
+    background: #272b24;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 999999;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-out;
+    pointer-events: auto;
 }
 
 /* Loader Animation */
@@ -683,6 +697,191 @@ html body {
     .statistics-title {
         font-size: 2rem;
     }
+}
+
+/* Footer Styles */
+.custom-footer {
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+.custom-footer-contact-padding{
+    padding-top:100px;
+}
+
+@media (min-width: 768px) {
+    .custom-footer {
+        min-height: 400px;
+    }
+}
+.footer-sitemap-title{
+    text-align: left;
+}
+@media (max-width: 768px) {
+    .footer-sitemap-title{
+        text-align: center;
+}
+}
+.footer-center-content,
+.footer-left,
+.footer-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+}
+
+.footer-center-content {
+    text-align: center;
+}
+
+.footer-left {
+    text-align: left;
+}
+
+.footer-right {
+    text-align: right;
+}
+
+.footer-center {
+    text-align: center;
+}
+.footer-content {
+    padding: 60px 0;
+    width: 100%;
+}
+.footer-content .row .sitemap-link-row{
+    align-items: flex-start;
+}
+@media (max-width:768px){
+.footer-content .row .sitemap-link-row{
+    align-items: flex-start;
+    text-align: center;
+}
+}
+.footer-content .row {
+    display: flex;
+    align-items: center;
+    min-height: 100%;
+}
+
+.footer-content a {
+    color: #fff !important;
+    text-decoration: none;
+    position: relative;
+}
+
+.footer-content a:hover {
+    color: #fff !important;
+    opacity: 1 !important;
+}
+
+.footer-content a:hover::before {
+    transform: scaleX(1);
+}
+
+.footer-content a::before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #fff;
+    transform: scaleX(0);
+    transform-origin: top left;
+    transition: transform 0.3s ease;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0px;
+    padding: 0px;
+    line-height: 25px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+.footer-link-item a{
+    font-size: 1rem;
+}
+
+/* Footer Contact Info Styles */
+@media (max-width:768px){
+.footer-contact-info{
+    text-align: center;
+}
+}
+.footer-contact-info h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.footer-contact-info address {
+    font-style: normal;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.footer-contact-info p {
+    margin-bottom: 0.5rem;
+}
+
+.footer-contact-info a {
+    color: #fff;
+    text-decoration: none;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-contact-info .footer-phone,
+.footer-contact-info .footer-email {
+    align-items: center;
+    gap: 0.5rem;
+}
+.footer-contact-data{
+    margin-top: 25px;
+}
+.footer-logo {
+    height: auto;
+    margin:0 auto;
+}
+
+.footer-contact-info h3 {
+    margin-bottom: 20px;
+}
+
+.footer-contact-info p {
+    margin-bottom: 0px;
+}
+
+
+@media (max-width: 768px) {
+    .footer-content {
+        padding: 40px 0 20px;
+    }
+    
+    .col-12 {
+        margin-bottom: 30px;
+        text-align: left !important;
+    }
+    
+
+}
     
     .statistic-text {
         font-size: 1.1rem;
@@ -690,15 +889,17 @@ html body {
     .statistic-title {
         font-size: 1rem;
     }
-}
+
 
 .hidden-preloader {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    display: none !important;
 }
 /*PAGE PRE LOADER END */
 /* Footer */
+
 .custom-footer {
     position: relative;
     z-index:100;
@@ -711,7 +912,11 @@ html body {
     max-height:800px;
     min-height:400px;
 }
-
+@media (max-width:768px){
+.custom-footer, .footer-contact-form-padding{
+    padding-top:100px;
+}
+}
 .footer-content {
     position: relative;
     z-index: 1; /* Ensure footer content is above the background */

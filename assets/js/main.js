@@ -108,19 +108,16 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // PAGE PRE LOADER
-document.addEventListener("DOMContentLoaded", function () {
-    // Hide preloader after DOM is ready or after 2 seconds, whichever comes first
-    const hidePreloader = () => {
-        const preloader = document.getElementById("preloader");
-        if (preloader) {
-            preloader.classList.add("hidden-preloader");
-        }
-    };
+const hidePreloader = () => {
+    const preloader = document.getElementById("preloader");
+    if (preloader) {
+        preloader.classList.add("hidden-preloader");
+    }
+};
 
-    // Set a maximum time to show preloader
-    setTimeout(hidePreloader, 2000);
+// Hide preloader when everything is loaded
+window.addEventListener("load", hidePreloader);
 
-    // Also hide when everything is loaded
-    window.addEventListener("load", hidePreloader);
-});
+// Set a maximum time to show preloader
+setTimeout(hidePreloader, 2000);
 
