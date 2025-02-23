@@ -11,14 +11,15 @@
  * @var string $excerpt          The gallery excerpt
  */
 ?>
-<div class="col-md-6 col-lg-4">
+<div class="gallery-item-wrapper">
     <article id="post-<?php echo esc_attr($post_id); ?>" <?php post_class('gallery-item', $post_id); ?>>
         <a href="<?php echo esc_url($permalink); ?>" class="gallery-item-link">
             <?php if ($preview_image_url) : ?>
                 <div class="gallery-item-thumbnail">
                     <img src="<?php echo esc_url($preview_image_url); ?>" 
                          alt="<?php echo esc_attr($title); ?>"
-                         class="img-fluid">
+                         class="img-fluid"
+                         onload="this.classList.add('loaded');">
                     <?php if ($has_media) : ?>
                         <span class="media-count">
                             <?php echo esc_html($media_count); ?>

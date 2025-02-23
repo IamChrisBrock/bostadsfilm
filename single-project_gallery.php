@@ -88,11 +88,36 @@ while (have_posts()) : the_post();
         <?php if (!empty($media_ids)) : ?>
             <div class="single-gallery-content">
                 <div class="<?php echo esc_attr($gallery_class); ?>">
-                    <?php foreach ($media_ids as $media_id) :
-                        $mime_type = get_post_mime_type($media_id);
+                    <?php foreach ($media_ids as $item_id) :
+                        // Check if this is a text block
+                        if (strpos($item_id, 'text_') === 0) {
+                            $content = get_post_meta(get_the_ID(), '_text_block_' . $item_id, true);
+                            if ($content) :
+                            ?>
+                            <a href="#text-content-<?php echo esc_attr($item_id); ?>" 
+                               class="single-gallery-item text-block loaded glightbox" 
+                               data-gallery="gallery">
+                                <div class="single-gallery-item-inner">
+                                    <div class="text-block-content">
+                                        <?php echo wp_kses_post($content); ?>
+                                    </div>
+                                </div>
+                            </a>
+                            <div id="text-content-<?php echo esc_attr($item_id); ?>" class="glightbox-hidden">
+                                <div class="lightbox-text-content">
+                                    <?php echo wp_kses_post($content); ?>
+                                </div>
+                            </div>
+                            <?php
+                            endif;
+                            continue;
+                        }
+
+                        // Handle media items
+                        $mime_type = get_post_mime_type($item_id);
                         $type = (strpos($mime_type, 'video/') === 0) ? 'video' : 'image';
-                        $url = wp_get_attachment_url($media_id);
-                        $thumbnail = wp_get_attachment_image_src($media_id, 'large');
+                        $url = wp_get_attachment_url($item_id);
+                        $thumbnail = wp_get_attachment_image_src($item_id, 'large');
                         
                         // Debug output
                         // echo (sprintf(
@@ -114,7 +139,7 @@ while (have_posts()) : the_post();
                             // Always wrap in a lightbox link, but with different data attributes for video/image
                             $lightbox_attrs = array(
                                 'class' => 'glightbox',
-                                'data-gallery' => 'gallery-' . get_the_ID()
+                                'data-gallery' => 'gallery'
                             );
                             
                             if ($type === 'video') {

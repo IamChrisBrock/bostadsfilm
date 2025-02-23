@@ -37,17 +37,42 @@ class Gallery_Item {
     private function setup_preview_image() {
         $this->preview_image = '';
         
-        if (!empty($this->media_ids)) {
-            $first_media = $this->media_ids[0];
-            $type = wp_attachment_is('video', $first_media) ? 'video' : 'image';
-            
-            if ($type === 'video') {
-                $this->preview_image = get_post_thumbnail_id($first_media) ? 
-                    wp_get_attachment_image_src(get_post_thumbnail_id($first_media), 'large') :
-                    null;
+        // Check if there's a selected thumbnail
+        $selected_thumbnail_id = get_post_meta($this->post->ID, '_gallery_thumbnail_id', true);
+        
+        if ($selected_thumbnail_id && in_array($selected_thumbnail_id, $this->media_ids)) {
+            $media_id = $selected_thumbnail_id;
+        } elseif (!empty($this->media_ids)) {
+            $media_id = $this->media_ids[0];
+        } else {
+            return;
+        }
+        
+        $type = wp_attachment_is('video', $media_id) ? 'video' : 'image';
+        
+        if ($type === 'video') {
+            // Try to get video thumbnail from metadata first
+            $video_metadata = wp_get_attachment_metadata($media_id);
+            if (!empty($video_metadata['thumbnail'])) {
+                $thumbnail_path = $video_metadata['thumbnail'];
+                $upload_dir = wp_upload_dir();
+                $thumbnail_url = $upload_dir['baseurl'] . '/' . $thumbnail_path;
+                $this->preview_image = array($thumbnail_url, 1920, 1080); // Default video dimensions
             } else {
-                $this->preview_image = wp_get_attachment_image_src($first_media, 'large');
+                // Fallback to post thumbnail if available
+                $post_thumbnail_id = get_post_thumbnail_id($media_id);
+                if ($post_thumbnail_id) {
+                    $this->preview_image = wp_get_attachment_image_src($post_thumbnail_id, 'large');
+                } else {
+                    // If no thumbnail is found, try to get a frame from the video
+                    $video_url = wp_get_attachment_url($media_id);
+                    if ($video_url) {
+                        $this->preview_image = array($video_url . '#t=0.1', 1920, 1080); // Get frame at 0.1 seconds
+                    }
+                }
             }
+        } else {
+            $this->preview_image = wp_get_attachment_image_src($media_id, 'large');
         }
     }
 

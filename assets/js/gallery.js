@@ -1,9 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize GLightbox
+    // Initialize GLightbox for all gallery items
     const lightbox = GLightbox({
+        selector: '.glightbox',
         touchNavigation: true,
         loop: true,
-        autoplayVideos: true
+        autoplayVideos: true,
+        width: '90vw',
+        height: 'auto',
+        cssEfects: {
+            fade: { in: 'fadeIn', out: 'fadeOut' }
+        },
+        onOpen: () => {
+            document.body.classList.add('glightbox-open');
+        },
+        onClose: () => {
+            document.body.classList.remove('glightbox-open');
+        },
+        plyr: {
+            css: 'https://cdn.plyr.io/3.6.8/plyr.css',
+            js: 'https://cdn.plyr.io/3.6.8/plyr.js',
+            config: {
+                ratio: '16:9',
+                fullscreen: { enabled: true }
+            }
+        }
     });
 
     // Initialize Masonry for masonry grids only
@@ -31,20 +51,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const lazyLoadMedia = (entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const media = entry.target;
-                const src = media.dataset.src;
-
-                if (media.tagName.toLowerCase() === 'video') {
-                    // Handle video lazy loading
-                    media.src = src;
-                    media.load();
+                const item = entry.target;
+                const type = item.closest('.single-gallery-item').dataset.type;
+                
+                if (type === 'text') {
+                    // Text blocks are always loaded
+                    item.classList.add('loaded');
+                    observer.unobserve(item);
                 } else {
-                    // Handle image lazy loading
-                    media.src = src;
+                    const src = item.dataset.src;
+                    if (item.tagName.toLowerCase() === 'video') {
+                        // Handle video lazy loading
+                        item.src = src;
+                        item.load();
+                    } else {
+                        // Handle image lazy loading
+                        item.src = src;
+                    }
+                    item.classList.add('loaded');
+                    observer.unobserve(item);
                 }
 
-                media.classList.add('loaded');
-                observer.unobserve(media);
 
                 // Trigger masonry layout after media loads
                 const gridParent = media.closest('.masonry-grid');

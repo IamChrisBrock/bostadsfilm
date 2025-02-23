@@ -22,9 +22,8 @@ $orderby = get_post_meta(get_the_ID(), '_gallery_orderby', true) ?: 'date';
     ?>
     
     <div class="gallery-page-content">
-        <div class="container">
             <?php if (have_posts()) : ?>
-                <div class="row gallery-grid columns-<?php echo esc_attr($columns); ?>">
+                <div class="gallery-grid columns-<?php echo esc_attr($columns); ?>">
                     <?php while (have_posts()) : the_post(); 
                         $gallery_item = new Gallery_Item(get_post());
                         $gallery_item->render();
@@ -40,6 +39,5 @@ $orderby = get_post_meta(get_the_ID(), '_gallery_orderby', true) ?: 'date';
             <?php else : ?>
                 <p class="no-galleries"><?php _e('No galleries found.', 'filmestate'); ?></p>
             <?php endif; ?>
-        </div>
     </div>
 </div>

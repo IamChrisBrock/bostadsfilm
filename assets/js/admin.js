@@ -1,8 +1,14 @@
+// Ensure we only bind events once
+var eventsInitialized = false;
+
 jQuery(document).ready(function($) {
-    // Make sure we're on the project gallery edit screen
-    if (!$('body').hasClass('post-type-project_gallery')) {
+    // Make sure we're on the project gallery edit screen and events haven't been initialized
+    if (!$('body').hasClass('post-type-project_gallery') || eventsInitialized) {
         return;
     }
+    
+    // Mark events as initialized
+    eventsInitialized = true;
 
     // Function to initialize MediaElement players
     function initMediaElementPlayers() {
@@ -44,15 +50,117 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // Function to update media order and save text content
+    function updateMediaOrder() {
+        var mediaIds = [];
+        $('.media-item').each(function() {
+            var itemId = $(this).data('id');
+            mediaIds.push(itemId);
+            
+            // Update text block content if this is a text block
+            if (itemId && itemId.toString().startsWith('text_')) {
+                var editor = tinymce.get(itemId);
+                if (editor) {
+                    var content = editor.getContent();
+                    $('#' + itemId).val(content);
+                }
+            }
+        });
+        $('#project_gallery_media').val(mediaIds.join(','));
+    }
+
     // Initialize sortable
     $('#project-gallery-media-container').sortable({
         items: '.media-item',
         cursor: 'move',
         placeholder: 'media-item-placeholder',
+        start: function(e, ui) {
+            // Store editor content before sorting
+            var itemId = ui.item.data('id');
+            if (itemId && itemId.toString().startsWith('text_')) {
+                var editor = tinymce.get(itemId);
+                if (editor) {
+                    ui.item.data('editor-content', editor.getContent());
+                    // Remove the editor before sorting
+                    wp.editor.remove(itemId);
+                }
+            }
+        },
+        stop: function(e, ui) {
+            // Reinitialize editor after sorting
+            var itemId = ui.item.data('id');
+            if (itemId && itemId.toString().startsWith('text_')) {
+                var content = ui.item.data('editor-content') || '';
+                wp.editor.initialize(itemId, {
+                    tinymce: {
+                        toolbar1: 'formatselect bold italic | alignleft aligncenter alignright | bullist numlist | link',
+                        block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
+                        height: 200,
+                        menubar: false,
+                        setup: function(editor) {
+                            editor.on('change', function() {
+                                updateMediaOrder();
+                            });
+                            // Set the content after initialization
+                            editor.on('init', function() {
+                                editor.setContent(content);
+                            });
+                        }
+                    },
+                    quicktags: true,
+                    mediaButtons: false
+                });
+            }
+        },
         update: function() {
             updateMediaOrder();
         }
     }).disableSelection();
+
+    // Text block counter
+    var textBlockCounter = 0;
+
+    // Remove any existing click handlers
+    $('.add-text').off('click');
+    
+    // Add text block using event delegation
+    $(document).on('click', '.add-text', function(e) {
+        e.preventDefault();
+        var textBlockId = 'text_' + Date.now() + '_' + (textBlockCounter++);
+        var container = $('#project-gallery-media-container');
+
+        var textBlockHtml = `
+            <div class="media-item text-block" data-id="${textBlockId}">
+                <div class="text-block-content">
+                    <textarea id="${textBlockId}" name="text_block_${textBlockId}"></textarea>
+                </div>
+                <div class="media-item-actions">
+                    <button type="button" class="button remove-item">Remove</button>
+                </div>
+            </div>
+        `;
+
+        container.append(textBlockHtml);
+
+        // Initialize WP Editor
+        wp.editor.initialize(textBlockId, {
+            tinymce: {
+                toolbar1: 'formatselect bold italic | alignleft aligncenter alignright | bullist numlist | link',
+                block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
+                height: 200,
+                menubar: false,
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        updateMediaOrder();
+                    });
+                }
+            },
+            quicktags: true,
+            mediaButtons: false
+        });
+
+        updateMediaOrder();
+    });
 
     // Media uploader
     var mediaUploader;
@@ -83,10 +191,12 @@ jQuery(document).ready(function($) {
             var container = $('#project-gallery-media-container');
             
             attachments.forEach(function(attachment) {
-                var type = attachment.type;
+                var contentType = attachment.type;
                 var thumbnail;
+                var itemId = attachment.id;
+                var itemType = contentType === 'video' ? 'video' : 'image';
 
-                if (type === 'video') {
+                if (contentType === 'video') {
                     // Try to get the video thumbnail
                     if (attachment.image && attachment.image.src) {
                         thumbnail = attachment.image.src;
@@ -103,7 +213,7 @@ jQuery(document).ready(function($) {
                 }
 
                 var mediaContent = '';
-                if (type === 'video') {
+                if (contentType === 'video') {
                     mediaContent = '<div class="pg-media-preview">' +
                         '<div class="pg-video-container">' +
                         '<video class="pg-video" preload="metadata" controls="controls">' +
@@ -127,10 +237,10 @@ jQuery(document).ready(function($) {
                         '</div>';
                 }
 
-                var mediaItem = $('<div class="media-item" data-id="' + attachment.id + '" data-type="' + type + '">' +
+                var mediaItem = $('<div class="media-item" data-id="' + itemId + '" data-type="' + itemType + '">' +
                     mediaContent +
-                    '<span class="media-type">' + type.charAt(0).toUpperCase() + type.slice(1) + '</span>' +
-                    '<button type="button" class="remove-media" title="Remove">&times;</button>' +
+                    '<span class="media-type">' + itemType.charAt(0).toUpperCase() + itemType.slice(1) + '</span>' +
+                    '<button type="button" class="remove-item" title="Remove">&times;</button>' +
                     '</div>');
 
                 container.append(mediaItem);
@@ -146,8 +256,8 @@ jQuery(document).ready(function($) {
         mediaUploader.open();
     });
 
-    // Remove media item
-    $(document).on('click', '.remove-media', function(e) {
+    // Remove any item (media or text)
+    $(document).on('click', '.remove-item', function(e) {
         e.preventDefault();
         $(this).closest('.media-item').remove();
         updateMediaOrder();
@@ -297,8 +407,8 @@ jQuery(document).ready(function($) {
         '.pg-video-container .mejs-container, .pg-video-container .mejs-overlay, .pg-video-container .mejs-layers { width: 100% !important; height: 100% !important; }\n' +
         '.pg-video-container .mejs-mediaelement { display: flex; align-items: center; justify-content: center; }\n' +
         '.pg-video-container video { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }\n' +
-        '.pg .media-item .media-type { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); color: white; padding: 2px 5px; font-size: 12px; z-index: 10; }\n' +
-        '.pg .media-item .remove-media { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.7); color: white; border: none; cursor: pointer; padding: 0 5px; z-index: 10; }\n' +
+        '.pg .media-item .media-type { position: absolute;  top: 5px;  left: 5px;  background: #999;  color: white;  z-index: 10;  border-radius: 25px;  padding: 5px 10px;  font-size: 9px;}\n' +
+        '.pg .media-item .remove-media { position: absolute;  top: 5px;  right: 5px;  background: #333;  color: white;  border: none;  cursor: pointer;  padding: 14px 10px;  z-index: 10;  border-radius: 50px;  line-height: 0;  width: 30px;  height: 30px;}\n' +
         '.pg .media-item-placeholder { border: 2px dashed #ccc; width: 250px; height: 150px; display: inline-block; vertical-align: top; margin: 10px; }\n' +
         '.pg .media-tags { margin-top: 5px; }\n' +
         '.pg .media-tag-input { width: 100%; margin-bottom: 5px; padding: 5px; border: 1px solid #ddd; border-radius: 3px; }\n' +
