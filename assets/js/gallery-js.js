@@ -1,26 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Lottie animation for portfolio link
-    const portfolioArrow = document.querySelector('.portfolio-link-arrow');
-    if (portfolioArrow) {
-        const animation = lottie.loadAnimation({
-            container: portfolioArrow,
-            renderer: 'svg',
-            loop: false,
-            autoplay: false,
-            path: portfolioArrow.dataset.animationPath
-        });
-
-        // Play animation on hover
-        portfolioArrow.closest('.portfolio-link').addEventListener('mouseenter', () => {
-            animation.setDirection(1);
-            animation.play();
-        });
-
-        portfolioArrow.closest('.portfolio-link').addEventListener('mouseleave', () => {
-            animation.setDirection(-1);
-            animation.play();
-        });
-    }
+    // Initialize GLightbox for all gallery items
+    const lightbox = GLightbox({
+        selector: '.glightbox',
+        touchNavigation: true,
+        loop: true,
+        autoplayVideos: true,
+        width: '90vw',
+        height: 'auto',
+        cssEfects: {
+            fade: { in: 'fadeIn', out: 'fadeOut' }
+        },
+        onOpen: () => {
+            document.body.classList.add('glightbox-open');
+        },
+        onClose: () => {
+            document.body.classList.remove('glightbox-open');
+        },
+        plyr: {
+            css: 'https://cdn.plyr.io/3.6.8/plyr.css',
+            js: 'https://cdn.plyr.io/3.6.8/plyr.js',
+            config: {
+                ratio: '16:9',
+                fullscreen: { enabled: true }
+            }
+        }
+    });
 
     // Lazy load gallery items
     const galleryItems = document.querySelectorAll('.single-gallery-item');
@@ -84,40 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
         rootMargin: '200px'
     });
 
-    galleryItems.forEach(item => itemObserver.observe(item));
-
-    // Initialize GLightbox
-    const lightbox = GLightbox({
-        selector: '.glightbox',
-        touchNavigation: true,
-        loop: true,
-        autoplayVideos: false,
-        preload: false,
-        moreLength: 0,
-        slideEffect: 'slide',
-        openEffect: 'fade',
-        closeEffect: 'fade',
-        draggable: true,
-        zoomable: true,
-        dragAutoSnap: true,
-        descPosition: 'bottom',
-        videosWidth: '960px',
-        plyr: {
-            css: false,
-            js: false,
-            config: {
-                controls: [
-                    'play-large',
-                    'play',
-                    'progress',
-                    'current-time',
-                    'mute',
-                    'volume',
-                    'fullscreen'
-                ],
-                hideControls: false
-            }
-        }
+    galleryItems.forEach(function(item) {
+        itemObserver.observe(item);
     });
 });
 
