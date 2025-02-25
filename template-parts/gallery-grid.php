@@ -2,6 +2,17 @@
 /**
  * Template part for displaying gallery grid
  * Used by both template-gallery.php and archive-project_gallery.php
+ *
+ * File Dependencies:
+ * - inc/components/class-gallery-item.php (Individual gallery items)
+ * - template-parts/components/gallery-item.php (Item template)
+ * - inc/gallery-filters.php (Filter functionality)
+ * - assets/js/gallery-filters.js (Filter interaction)
+ * - assets/css/project-galleries.css (Grid styles)
+ * 
+ * Used by:
+ * - template-gallery.php (Main gallery template)
+ * - archive-project_gallery.php (Archive page)
  */
 
 use Inkperial\Components\Gallery_Item;

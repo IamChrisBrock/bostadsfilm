@@ -17,10 +17,7 @@ add_filter('body_class', function($classes) use ($thumbnail_style) {
 
 get_header();
 
-// Enqueue gallery scripts
-wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery'), null, true);
-wp_enqueue_script('gallery-lazy-load', get_template_directory_uri() . '/assets/js/gallery-lazy-load.js', array('jquery'), null, true);
-wp_enqueue_script('gallery-lightbox', get_template_directory_uri() . '/assets/js/gallery-lightbox.js', array('jquery'), null, true);
+
 
 // Get the page content first
 while (have_posts()) : the_post(); ?>

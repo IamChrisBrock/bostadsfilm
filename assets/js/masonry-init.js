@@ -1,31 +1,67 @@
 jQuery(document).ready(function($) {
     // Initialize Masonry for specific modes
     function initMasonry(mode) {
+        var $grid = $('.mode-' + mode);
+        if (!$grid.length) return;
+
+        // Hide grid initially
+        $grid.css('opacity', '0');
+        
+        // Store initial positions
+        $grid.find('.single-gallery-item').each(function() {
+            $(this).css({
+                position: 'absolute',
+                left: $(this).offset().left + 'px',
+                top: $(this).offset().top + 'px'
+            });
+        });
+
         var options = {
             itemSelector: '.single-gallery-item',
             percentPosition: true,
-            columnWidth: '.single-gallery-item'
+            columnWidth: '.single-gallery-item',
+            gutter: mode === 'pinterest' ? 20 : 1,
+            transitionDuration: 0,
+            initLayout: true,
+            resize: false
         };
 
-        // Add specific options based on mode
-        if (mode === 'pinterest') {
-            options.gutter = 20;
-        } else {
-            options.gutter = 1;
+        // Initialize Masonry with no animation
+        var masonryInstance = $grid.masonry(options);
+        
+        // Add CSS transitions after initial layout
+        setTimeout(function() {
+            $grid.find('.single-gallery-item').css({
+                transition: 'all 0.4s ease-in-out'
+            });
+            $grid.css('opacity', '1');
+        }, 100);
+
+        // Debounce function
+        function debounce(func, wait) {
+            var timeout;
+            return function() {
+                var context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    func.apply(context, args);
+                }, wait);
+            };
         }
 
-        var $grid = $('.mode-' + mode);
-        
-        // Wait for all images to load
-        $grid.imagesLoaded(function() {
-            $grid.masonry(options);
-        });
+        // Handle resize
+        var resizeHandler = debounce(function() {
+            if (!$grid.data('masonry')) return;
+            $grid.masonry('layout');
+        }, 250);
 
-        // Update layout when images load
-        $grid.find('img').each(function() {
-            $(this).on('load', function() {
-                $grid.masonry('layout');
-            });
+        // Remove any existing handlers and add new one
+        $(window).off('resize.masonry-' + mode)
+                .on('resize.masonry-' + mode, resizeHandler);
+
+        // Initial layout after images load
+        $grid.imagesLoaded().done(function() {
+            resizeHandler();
         });
     }
 

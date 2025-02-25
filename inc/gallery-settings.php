@@ -1,6 +1,16 @@
 <?php
 /**
  * Gallery Page Settings
+ * 
+ * Handles gallery page settings in the WordPress admin area
+ * 
+ * File Dependencies:
+ * - template-gallery.php (Uses settings for display)
+ * - template-parts/gallery-grid.php (Uses settings for grid layout)
+ * 
+ * Used by:
+ * - WordPress admin area for gallery pages
+ * - Gallery templates for display options
  */
 
 if (!defined('ABSPATH')) {

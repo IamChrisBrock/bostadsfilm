@@ -1,6 +1,16 @@
 <?php
 /**
  * Template for displaying project gallery archive
+ * 
+ * File Dependencies:
+ * - template-parts/gallery-grid.php (Main grid layout)
+ * - template-parts/gallery-header.php (Archive header)
+ * - inc/gallery-filters.php (Filter functionality)
+ * - assets/js/gallery-filters.js (Filter interaction)
+ * - assets/css/project-galleries.css (Gallery styles)
+ * 
+ * Used by:
+ * - WordPress archive for 'project_gallery' post type
  */
 
 get_header();

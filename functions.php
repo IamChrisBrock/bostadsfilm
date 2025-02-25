@@ -54,7 +54,7 @@ function mytheme_enqueue_css() {
         wp_enqueue_style('project-galleries', get_template_directory_uri() . '/assets/css/project-galleries.css');
         wp_enqueue_script('masonry-js', 'https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js', array('jquery'), '4.2.2', true);
         wp_enqueue_script('imagesloaded', 'https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js', array('jquery'), '5.0.0', true);
-        wp_enqueue_script('masonry-init', get_template_directory_uri() . '/assets/js/masonry-init.js', array('jquery', 'masonry-js', 'imagesloaded'), null, true);
+        wp_enqueue_script('masonry-init', get_template_directory_uri() . '/assets/js/masonry-init.js', array('jquery', 'masonry-js', 'imagesloaded'), filemtime(get_template_directory() . '/assets/js/masonry-init.js'), true);
         wp_enqueue_script('info-boxes', get_template_directory_uri() . '/assets/js/info-boxes.js', array('jquery'), null, true);
         wp_enqueue_script('gallery-filters', get_template_directory_uri() . '/assets/js/gallery-filters.js', array('jquery', 'lottie-js'), null, true);
         wp_enqueue_script('header-animations', get_template_directory_uri() . '/assets/js/header-animations.js', array('jquery'), null, true);

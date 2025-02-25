@@ -3,6 +3,14 @@
  * Gallery Item Component
  * 
  * Represents a single gallery item with its data and rendering logic
+ * 
+ * File Dependencies:
+ * - template-parts/components/gallery-item.php (Template for rendering)
+ * - assets/css/project-galleries.css (Styles)
+ * 
+ * Used by:
+ * - template-parts/gallery-grid.php (Grid layout)
+ * - inc/gallery-filters.php (For AJAX filtering)
  */
 
 namespace Inkperial\Components;

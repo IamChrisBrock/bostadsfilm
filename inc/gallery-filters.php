@@ -1,6 +1,16 @@
 <?php
 /**
  * Gallery Filtering System
+ * 
+ * File Dependencies:
+ * - inc/components/class-gallery-item.php (For rendering filtered items)
+ * - assets/js/gallery-filters.js (Frontend filtering logic)
+ * - assets/css/project-galleries.css (Filter styles)
+ * 
+ * Used by:
+ * - template-gallery.php (Main gallery template)
+ * - template-parts/gallery-grid.php (Grid layout)
+ * - archive-project_gallery.php (Archive page)
  */
 
 if (!defined('ABSPATH')) {

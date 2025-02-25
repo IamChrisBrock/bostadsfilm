@@ -2,6 +2,13 @@
 /**
  * Gallery Item Component Template
  * 
+ * File Dependencies:
+ * - inc/components/class-gallery-item.php (Main class)
+ * - assets/css/project-galleries.css (Styles)
+ * 
+ * Used by:
+ * - template-parts/gallery-grid.php (Through class-gallery-item.php)
+ * 
  * @var int    $post_id          The post ID
  * @var string $title            The gallery title
  * @var string $permalink        The gallery permalink
