@@ -6,36 +6,6 @@ jQuery(document).ready(function($) {
 
         // Hide grid initially
         $grid.css('opacity', '0');
-        
-        // Store initial positions
-        $grid.find('.single-gallery-item').each(function() {
-            $(this).css({
-                position: 'absolute',
-                left: $(this).offset().left + 'px',
-                top: $(this).offset().top + 'px'
-            });
-        });
-
-        var options = {
-            itemSelector: '.single-gallery-item',
-            percentPosition: true,
-            columnWidth: '.single-gallery-item',
-            gutter: mode === 'pinterest' ? 20 : 1,
-            transitionDuration: 0,
-            initLayout: true,
-            resize: false
-        };
-
-        // Initialize Masonry with no animation
-        var masonryInstance = $grid.masonry(options);
-        
-        // Add CSS transitions after initial layout
-        setTimeout(function() {
-            $grid.find('.single-gallery-item').css({
-                transition: 'all 0.4s ease-in-out'
-            });
-            $grid.css('opacity', '1');
-        }, 100);
 
         // Debounce function
         function debounce(func, wait) {
@@ -49,19 +19,76 @@ jQuery(document).ready(function($) {
             };
         }
 
-        // Handle resize
+        // Create resize handler
         var resizeHandler = debounce(function() {
             if (!$grid.data('masonry')) return;
             $grid.masonry('layout');
         }, 250);
 
-        // Remove any existing handlers and add new one
-        $(window).off('resize.masonry-' + mode)
-                .on('resize.masonry-' + mode, resizeHandler);
+        // Initialize Masonry with initial options
+        var masonryInstance = $grid.masonry({
+            itemSelector: '.single-gallery-item',
+            percentPosition: true,
+            columnWidth: '.single-gallery-item',
+            gutter: mode === 'pinterest' ? 20 : 1,
+            transitionDuration: 0, // Start with no transition
+            initLayout: false // Don't layout immediately
+        });
 
-        // Initial layout after images load
-        $grid.imagesLoaded().done(function() {
-            resizeHandler();
+        // Track loaded items
+        var totalItems = $grid.find('.single-gallery-item').length;
+        var loadedItems = 0;
+
+        // Function to check if all items are loaded
+        function checkAllLoaded() {
+            loadedItems++;
+            if (loadedItems === totalItems) {
+                // All items loaded, do final layout
+                $grid.masonry('layout');
+                
+                // Now enable transitions for smooth updates
+                $grid.find('.single-gallery-item').css('transition', 'all 0.4s ease-in-out');
+                
+                // Show grid
+                $grid.css('opacity', '1');
+                
+                // Bind resize handler
+                $(window).off('resize.masonry-' + mode)
+                        .on('resize.masonry-' + mode, resizeHandler);
+            }
+        }
+
+        // Wait for all images to load
+        $grid.find('.single-gallery-item').each(function() {
+            var $item = $(this);
+            var $img = $item.find('img');
+            var $video = $item.find('video');
+
+            if ($img.length) {
+                if ($img[0].complete) {
+                    $item.addClass('loaded');
+                    checkAllLoaded();
+                } else {
+                    $img.on('load', function() {
+                        $item.addClass('loaded');
+                        checkAllLoaded();
+                    });
+                }
+            } else if ($video.length) {
+                if ($video[0].readyState >= 1) {
+                    $item.addClass('loaded');
+                    checkAllLoaded();
+                } else {
+                    $video.on('loadedmetadata', function() {
+                        $item.addClass('loaded');
+                        checkAllLoaded();
+                    });
+                }
+            } else {
+                // Text blocks or other non-media items
+                $item.addClass('loaded');
+                checkAllLoaded();
+            }
         });
     }
 
@@ -72,13 +99,11 @@ jQuery(document).ready(function($) {
 
         // Wait for all images to load before revealing grid
         $grid.css('opacity', '0');
-        $grid.imagesLoaded(function() {
+        $grid.imagesLoaded().progress(function(instance, image) {
+            // Add loaded class to each image as it loads
+            $(image.img).closest('.single-gallery-item').addClass('loaded');
+        }).done(function() {
             $grid.css('opacity', '1');
-        });
-
-        // Update layout when window resizes
-        $(window).on('resize', function() {
-            $grid.find('img').css('height', 'auto');
         });
     }
 

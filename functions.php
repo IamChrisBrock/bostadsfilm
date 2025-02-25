@@ -108,9 +108,7 @@ function mytheme_enqueue_scripts() {
     wp_enqueue_script('lottie-link-js', get_template_directory_uri() . '/assets/js/lottie-link.js', array('lottie-js'), '1.0', true);
 
 
-    // Gallery scripts and styles
-        wp_enqueue_script('masonry', 'https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js', array('jquery'), '4.2.2', true);
-        wp_enqueue_script('imagesloaded', 'https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js', array('jquery'), '5.0.0', true);
+    // Gallery scripts and styles - moved to mytheme_enqueue_css()
         // Add Plyr for single project gallery
         if (is_singular('project_gallery')) {
             wp_enqueue_style('plyr', 'https://cdn.plyr.io/3.7.8/plyr.css');

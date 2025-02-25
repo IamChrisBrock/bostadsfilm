@@ -84,12 +84,20 @@ function render_project_gallery_media_box($post) {
     // Add nonce for security
     wp_nonce_field('project_gallery_media_nonce', 'project_gallery_media_nonce');
 
-    // Get saved media IDs
+    // Get saved media IDs and data
     $media_ids = get_post_meta($post->ID, '_project_gallery_media', true);
-    $media_ids = $media_ids ? explode(',', $media_ids) : array();
+    $media_ids = $media_ids ? array_filter(explode(',', $media_ids)) : array(); // Filter out empty values
 
     // Get selected thumbnail ID
     $selected_thumbnail_id = get_post_meta($post->ID, '_gallery_thumbnail_id', true);
+
+    // Pre-load text block content
+    $text_blocks = array();
+    foreach ($media_ids as $item_id) {
+        if (strpos($item_id, 'text_') === 0) {
+            $text_blocks[$item_id] = get_post_meta($post->ID, '_text_block_' . $item_id, true);
+        }
+    }
 
     // Output the media gallery interface
     ?>
@@ -172,7 +180,7 @@ function render_project_gallery_media_box($post) {
             <p><?php _e('Drag and drop to reorder items. Add media or text blocks to create your gallery.', 'filmestate'); ?></p>
         </div>
 
-        <div id="project-gallery-media-container" class="sortable-media-container">
+        <div id="project_gallery_media_container" class="sortable-media-container">
             <?php
             if (!empty($media_ids)) {
                 foreach ($media_ids as $item_id) {
@@ -191,39 +199,52 @@ function render_project_gallery_media_box($post) {
                         $content = get_post_meta($post->ID, '_text_block_' . $item_id, true);
                         if ($content) {
                             ?>
-                            <div class="media-item text-block" data-id="<?php echo esc_attr($item_id); ?>">
-                                <div class="text-block-content">
-                                    <textarea id="<?php echo esc_attr($item_id); ?>" name="text_block_<?php echo esc_attr($item_id); ?>"><?php echo esc_textarea($content); ?></textarea>
+                            <div class="media-item text-block" data-id="<?php echo esc_attr($item_id); ?>" data-type="text">
+                                <div class="text-block-content wp-core-ui">
+                                    <?php
+                                    // Create a safe editor ID
+                                    $editor_id = $item_id;
+                                    // Ensure content is properly formatted for the visual editor
+                                    $content = wpautop(wp_kses_post($content));
+
+
+
+
+                                    wp_editor(
+                                        $content,
+                                        $editor_id,
+                                        array(
+                                            'textarea_name' => 'text_block_' . $item_id,
+                                            'textarea_rows' => 10,
+                                            'editor_class' => 'text-block-editor',
+                                            'media_buttons' => false,
+                                            'teeny'        => false,
+                                            'quicktags'    => true,
+                                            'tinymce'      => array(
+                                                'selector' => '#' . $editor_id,
+                                                'toolbar1' => 'formatselect bold italic | alignleft aligncenter alignright | bullist numlist | link',
+                                                'block_formats' => 'Paragraph=p; Heading 2=h2; Heading 3=h3',
+                                                'height' => 200,
+                                                'menubar' => false,
+                                                'wpautop' => true,
+                                                'setup' => 'function(editor) {
+                                                    editor.on("change", function() {
+                                                        var content = editor.getContent();
+                                                        jQuery("#" + editor.id).val(content);
+                                                        if (typeof window.updateMediaOrder === "function") {
+                                                            window.updateMediaOrder();
+                                                        }
+                                                    });
+                                                }'
+                                            )
+                                        )
+                                    );
+                                    ?>
                                 </div>
                                 <div class="media-item-actions">
                                     <button type="button" class="button remove-item">Remove</button>
                                 </div>
                             </div>
-                            <?php
-                            
-                            // Initialize the editor after rendering
-                            ?>
-                            <script>
-                            jQuery(document).ready(function($) {
-                                wp.editor.initialize('<?php echo esc_js($item_id); ?>', {
-                                    tinymce: {
-                                        toolbar1: 'formatselect bold italic | alignleft aligncenter alignright | bullist numlist | link',
-                                        block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
-                                        height: 200,
-                                        menubar: false,
-                                        setup: function(editor) {
-                                            editor.on('change', function() {
-                                                var content = editor.getContent();
-                                                $('#<?php echo esc_js($item_id); ?>').val(content);
-                                                updateMediaOrder();
-                                            });
-                                        }
-                                    },
-                                    quicktags: true,
-                                    mediaButtons: false
-                                });
-                            });
-                            </script>
                             <?php
                             continue;
                         }
@@ -299,7 +320,8 @@ function render_project_gallery_media_box($post) {
             ?>
         </div>
 
-        <input type="hidden" name="project_gallery_media" id="project-gallery-media" value="<?php echo esc_attr(implode(',', $media_ids)); ?>">
+        <input type="hidden" name="project_gallery_media" value="<?php echo esc_attr(implode(',', $media_ids)); ?>">
+        <input type="hidden" name="project_gallery_media_data" value="<?php echo esc_attr(get_post_meta($post->ID, '_project_gallery_media_data', true)); ?>">
         <button type="button" class="button button-primary" id="add-project-media">
             <span class="dashicons dashicons-plus" style="margin: 4px 5px 0 -2px;"></span>
             <?php _e('Add Media', 'filmestate'); ?>
@@ -326,19 +348,28 @@ function save_project_gallery_meta($post_id) {
         return;
     }
 
-    // Save media IDs and text blocks
+    // Save media IDs
     if (isset($_POST['project_gallery_media'])) {
         $media_ids = sanitize_text_field($_POST['project_gallery_media']);
-        update_post_meta($post_id, '_project_gallery_media', $media_ids);
-        
-        // Save text blocks
-        $media_ids_array = explode(',', $media_ids);
-        foreach ($media_ids_array as $item_id) {
-            if (strpos($item_id, 'text_') === 0) {
-                $content_key = 'text_block_' . $item_id;
-                if (isset($_POST[$content_key])) {
-                    $content = wp_kses_post($_POST[$content_key]);
-                    update_post_meta($post_id, '_' . $content_key, $content);
+        if (!empty($media_ids)) {
+            update_post_meta($post_id, '_project_gallery_media', $media_ids);
+        }
+    }
+    
+    // Save full media data including text block content
+    if (isset($_POST['project_gallery_media_data'])) {
+        $media_data = json_decode(wp_unslash($_POST['project_gallery_media_data']), true);
+        if (is_array($media_data)) {
+            // Save the full media data
+            update_post_meta($post_id, '_project_gallery_media_data', wp_slash(json_encode($media_data)));
+            
+            // Also update individual text block content
+            foreach ($media_data as $item) {
+                if (isset($item['type']) && $item['type'] === 'text' && isset($item['id']) && isset($item['content'])) {
+                    $content = wp_kses_post($item['content']);
+                    // Remove extra <p> tags if they exist
+                    $content = preg_replace('/^<p>(.*)<\/p>$/s', '$1', $content);
+                    update_post_meta($post_id, '_text_block_' . $item['id'], $content);
                 }
             }
         }
@@ -444,26 +475,63 @@ function render_project_gallery_info_boxes($post) {
                            value="<?php echo esc_attr($info_boxes[$i]['headline']); ?>" 
                            class="widefat">
                 </p>
-                <p>
-                    <label for="project_gallery_info_box_<?php echo $i; ?>_content"><?php _e('Content:', 'filmestate'); ?></label><br>
-                    <textarea id="project_gallery_info_box_<?php echo $i; ?>_content" 
-                              name="project_gallery_info_box_<?php echo $i; ?>_content" 
-                              class="widefat" rows="4"><?php echo esc_textarea($info_boxes[$i]['content']); ?></textarea>
-                </p>
+                <div class="info-box-content-wrapper">
+                    <label for="project_gallery_info_box_<?php echo $i; ?>_content"><?php _e('Content:', 'filmestate'); ?></label>
+                    <?php 
+                    $editor_id = 'info_box_editor_' . $i;
+                    // Ensure content is properly formatted for the visual editor
+                    $content = wpautop(wp_kses_post($info_boxes[$i]['content']));
+                    add_filter('tiny_mce_before_init', function($settings) {
+                        $settings['init_instance_callback'] = "function(editor) {
+                            editor.on('PreInit', function(e) {
+                                var doc = editor.getDoc();
+                                if (doc && doc.body) {
+                                    doc.body.style.backgroundColor = '#fff';
+                                }
+                            });
+                        }";
+                        return $settings;
+                    });
+
+
+
+                    wp_editor(
+                        $content,
+                        $editor_id,
+                        array(
+                            'textarea_name' => 'project_gallery_info_box_' . $i . '_content',
+                            'textarea_rows' => 8,
+                            'editor_class' => 'info-box-editor',
+                            'media_buttons' => false,
+                            'teeny' => true,
+                            'quicktags' => true,
+                            'tinymce' => array(
+                                'toolbar1' => 'bold,italic,underline,bullist,numlist,link,unlink',
+                                'toolbar2' => '',
+                                'wpautop' => true,
+                                'setup' => 'function(editor) {
+                                    editor.on("change", function() {
+                                        var content = editor.getContent();
+                                        jQuery("[name=project_gallery_info_box_' . $i . '_content]").val(content);
+                                    });
+                                }'
+                            )
+                        )
+                    );
+                    ?>
+                </div>
             </div>
         <?php endfor; ?>
     </div>
     <style>
         .info-boxes-wrapper {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            flex-wrap: wrap;
             margin: 0 -10px;
             padding: 10px;
         }
         .info-box-section {
-            flex: 1;
-            min-width: 250px;
             padding: 15px;
             background: #f9f9f9;
             border: 1px solid #e5e5e5;
@@ -475,8 +543,16 @@ function render_project_gallery_info_boxes($post) {
             padding-bottom: 10px;
             border-bottom: 1px solid #e5e5e5;
         }
-        .info-box-section textarea {
-            min-height: 80px;
+        .info-box-content-wrapper {
+            margin-top: 15px;
+        }
+        .info-box-content-wrapper label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .info-box-section .wp-editor-wrap {
+            margin-bottom: 0;
         }
     </style>
     <?php
@@ -512,10 +588,43 @@ function save_project_gallery_info_boxes($post_id) {
         $content_key = 'project_gallery_info_box_' . $i . '_content';
 
         if (isset($_POST[$headline_key])) {
-            update_post_meta($post_id, '_' . $headline_key, sanitize_text_field($_POST[$headline_key]));
+            update_post_meta(
+                $post_id,
+                '_' . $headline_key,
+                sanitize_text_field($_POST[$headline_key])
+            );
         }
+
         if (isset($_POST[$content_key])) {
-            update_post_meta($post_id, '_' . $content_key, wp_kses_post($_POST[$content_key]));
+            // Get raw content and ensure proper formatting
+            $content = $_POST[$content_key];
+            $content = wp_kses_post($content);
+            // Remove extra <p> tags if they exist
+            $content = preg_replace('/^<p>(.*)<\/p>$/s', '$1', $content);
+            update_post_meta($post_id, '_' . $content_key, $content);
+        }
+    }
+
+    // Save info boxes data
+    for ($i = 1; $i <= 3; $i++) {
+        $headline_key = 'project_gallery_info_box_' . $i . '_headline';
+        $content_key = 'project_gallery_info_box_' . $i . '_content';
+
+        if (isset($_POST[$headline_key])) {
+            update_post_meta(
+                $post_id,
+                '_' . $headline_key,
+                sanitize_text_field($_POST[$headline_key])
+            );
+        }
+
+        if (isset($_POST[$content_key])) {
+            // Get raw content and ensure proper formatting
+            $content = $_POST[$content_key];
+            $content = wp_kses_post($content);
+            // Remove extra <p> tags if they exist
+            $content = preg_replace('/^<p>(.*)<\/p>$/s', '$1', $content);
+            update_post_meta($post_id, '_' . $content_key, $content);
         }
     }
 }

@@ -1363,6 +1363,7 @@ body.thumbnail-style-square .gallery-item-thumbnail {
 }
 
 .single-gallery-item.text-block .text-block-content {
+    color:var(--primary-text-color);
     padding: 2rem;
     width: 100%;
 }

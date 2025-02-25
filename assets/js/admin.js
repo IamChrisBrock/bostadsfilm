@@ -1,7 +1,45 @@
 // Ensure we only bind events once
 var eventsInitialized = false;
 
+// Make updateMediaOrder function globally accessible
+window.updateMediaOrder = function() {
+    var mediaOrder = [];
+    jQuery('#project_gallery_media_container .media-item').each(function() {
+        var itemType = jQuery(this).data('type');
+        var itemId = jQuery(this).data('id');
+        
+        if (itemType === 'text') {
+            var content = '';
+            var editor = tinymce.get(itemId);
+            if (editor) {
+                content = editor.getContent();
+                // Also update the textarea
+                jQuery('#' + itemId).val(content);
+            } else {
+                content = jQuery('#' + itemId).val();
+            }
+            mediaOrder.push({
+                type: itemType,
+                id: itemId,
+                content: content
+            });
+        } else {
+            mediaOrder.push({
+                type: itemType,
+                id: itemId
+            });
+        }
+    });
+    
+    // Update the hidden input fields with the new order
+    var orderString = mediaOrder.map(function(item) { return item.id; }).join(',');
+    jQuery('input[name="project_gallery_media"]').val(orderString);
+    jQuery('input[name="project_gallery_media_data"]').val(JSON.stringify(mediaOrder));
+    console.log('Form fields updated with new order:', orderString);
+};
+
 jQuery(document).ready(function($) {
+
     // Make sure we're on the project gallery edit screen and events haven't been initialized
     if (!$('body').hasClass('post-type-project_gallery') || eventsInitialized) {
         return;
@@ -9,6 +47,8 @@ jQuery(document).ready(function($) {
     
     // Mark events as initialized
     eventsInitialized = true;
+
+
 
     // Function to initialize MediaElement players
     function initMediaElementPlayers() {
@@ -50,70 +90,76 @@ jQuery(document).ready(function($) {
         });
     }
 
-    // Function to update media order and save text content
-    function updateMediaOrder() {
-        var mediaIds = [];
-        $('.media-item').each(function() {
-            var itemId = $(this).data('id');
-            mediaIds.push(itemId);
-            
-            // Update text block content if this is a text block
-            if (itemId && itemId.toString().startsWith('text_')) {
-                var editor = tinymce.get(itemId);
-                if (editor) {
-                    var content = editor.getContent();
-                    $('#' + itemId).val(content);
-                }
-            }
-        });
-        $('#project_gallery_media').val(mediaIds.join(','));
-    }
+
 
     // Initialize sortable
-    $('#project-gallery-media-container').sortable({
+    $('#project_gallery_media_container').sortable({
         items: '.media-item',
         cursor: 'move',
         placeholder: 'media-item-placeholder',
         start: function(e, ui) {
-            // Store editor content before sorting
             var itemId = ui.item.data('id');
             if (itemId && itemId.toString().startsWith('text_')) {
                 var editor = tinymce.get(itemId);
                 if (editor) {
+                    // Store content and editor state
                     ui.item.data('editor-content', editor.getContent());
-                    // Remove the editor before sorting
-                    wp.editor.remove(itemId);
+                    ui.item.data('editor-mode', editor.isHidden() ? 'html' : 'tmce');
+                    
+                    // Remove the editor completely
+                    editor.remove();
+                    tinymce.remove('#' + itemId);
+                } else {
+                    // If no editor, store textarea content
+                    ui.item.data('editor-content', $('#' + itemId).val());
+                    ui.item.data('editor-mode', 'html');
                 }
             }
         },
         stop: function(e, ui) {
-            // Reinitialize editor after sorting
             var itemId = ui.item.data('id');
             if (itemId && itemId.toString().startsWith('text_')) {
-                var content = ui.item.data('editor-content') || '';
-                wp.editor.initialize(itemId, {
-                    tinymce: {
-                        toolbar1: 'formatselect bold italic | alignleft aligncenter alignright | bullist numlist | link',
-                        block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
-                        height: 200,
-                        menubar: false,
-                        setup: function(editor) {
+                var content = ui.item.data('editor-content');
+                var mode = ui.item.data('editor-mode');
+                
+                // Always set the textarea content first
+                $('#' + itemId).val(content);
+                
+                // Remove the editor properly
+                if (typeof tinyMCE !== 'undefined') {
+                    tinyMCE.execCommand('mceRemoveEditor', true, itemId);
+                }
+                
+                // Re-init the editor with the same settings as initial
+                tinyMCE.init({
+                    selector: '#' + itemId,
+                    toolbar1: 'formatselect bold italic | alignleft aligncenter alignright | bullist numlist | link',
+                    block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
+                    height: 200,
+                    menubar: false,
+                    wpautop: true,
+                    setup: function(editor) {
+                        editor.on('init', function() {
+                            // Set content after init
+                            editor.setContent(content);
+                            
+                            // Switch to the correct mode
+                            if (mode === 'html') {
+                                switchEditors.go(itemId, 'html');
+                            }
+                            
+                            // Setup change handler
                             editor.on('change', function() {
-                                updateMediaOrder();
+                                window.updateMediaOrder();
                             });
-                            // Set the content after initialization
-                            editor.on('init', function() {
-                                editor.setContent(content);
-                            });
-                        }
-                    },
-                    quicktags: true,
-                    mediaButtons: false
+                        });
+                    }
                 });
             }
+            window.updateMediaOrder();
         },
         update: function() {
-            updateMediaOrder();
+            // updateMediaOrder will be called in stop handler
         }
     }).disableSelection();
 
@@ -130,8 +176,8 @@ jQuery(document).ready(function($) {
         var container = $('#project-gallery-media-container');
 
         var textBlockHtml = `
-            <div class="media-item text-block" data-id="${textBlockId}">
-                <div class="text-block-content">
+            <div class="media-item text-block" data-id="${textBlockId}" data-type="text">
+                <div class="text-block-content wp-core-ui">
                     <textarea id="${textBlockId}" name="text_block_${textBlockId}"></textarea>
                 </div>
                 <div class="media-item-actions">
@@ -149,6 +195,7 @@ jQuery(document).ready(function($) {
                 block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3',
                 height: 200,
                 menubar: false,
+                wpautop: true,
                 setup: function(editor) {
                     editor.on('change', function() {
                         updateMediaOrder();
