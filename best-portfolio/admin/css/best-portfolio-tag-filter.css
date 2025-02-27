@@ -1,0 +1,263 @@
+/**
+ * Best Portfolio Tag Filter Styles
+ *
+ * This file contains all styles related to the tag filtering system
+ * for both galleries and gallery items.
+ *
+ * @since      1.0.0
+ * @package    BestPortfolio
+ * @subpackage BestPortfolio/admin/css
+ */
+
+/* Tag Filter Container */
+.best-portfolio-filter {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.best-portfolio-filter h4 {
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+    color: #23282d;
+    font-size: 16px;
+}
+
+/* Filter Options */
+.filter-options {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 3px;
+}
+
+.filter-options label {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 13px;
+    color: #666;
+}
+
+.filter-options input[type="radio"] {
+    margin-right: 5px;
+}
+
+/* Tag List */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #f0f0f0;
+    border-radius: 3px;
+}
+
+/* Tag Checkbox */
+.tag-checkbox {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border: 1px solid #e2e4e7;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag-checkbox:hover {
+    background: #f0f0f1;
+    border-color: #c3c4c7;
+}
+
+.tag-checkbox.active {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.tag-checkbox input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.tag-checkbox .count {
+    margin-left: 5px;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* Tag Cloud */
+.best-portfolio-tag-cloud {
+    margin: 20px 0;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.tag-cloud-link {
+    display: inline-block;
+    margin: 0 5px 5px 0;
+    padding: 4px 8px;
+    background: #f0f0f1;
+    border-radius: 3px;
+    color: #2c3338;
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.tag-cloud-link:hover {
+    background: #2271b1;
+    color: #fff;
+}
+
+.tag-cloud-link.selected {
+    background: #2271b1;
+    color: #fff;
+}
+
+/* Filter Actions */
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.apply-filter,
+.clear-filter {
+    padding: 5px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.apply-filter {
+    background: #2271b1;
+    color: #fff;
+    border: none;
+}
+
+.apply-filter:hover {
+    background: #135e96;
+}
+
+.clear-filter {
+    background: #f6f7f7;
+    border: 1px solid #c3c4c7;
+    color: #2c3338;
+}
+
+.clear-filter:hover {
+    background: #f0f0f1;
+    border-color: #8c8f94;
+}
+
+/* Loading State */
+.best-portfolio-filter.filtering {
+    position: relative;
+    pointer-events: none;
+}
+
+.best-portfolio-filter.filtering::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.best-portfolio-filter.filtering::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #2271b1;
+    border-top-color: transparent;
+    border-radius: 50%;
+    z-index: 1;
+    animation: tag-filter-spinner 0.6s linear infinite;
+}
+
+@keyframes tag-filter-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Results Grid */
+.filter-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.filter-results .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    color: #666;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 782px) {
+    .filter-results {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .tag-list {
+        max-height: 150px;
+    }
+
+    .filter-options label {
+        display: block;
+        margin-bottom: 10px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .best-portfolio-filter {
+        background: #1d2327;
+        border-color: #2c3338;
+    }
+
+    .tag-checkbox {
+        background: #2c3338;
+        border-color: #3c434a;
+        color: #f0f0f1;
+    }
+
+    .tag-checkbox:hover {
+        background: #3c434a;
+    }
+
+    .tag-cloud-link {
+        background: #2c3338;
+        color: #f0f0f1;
+    }
+
+    .clear-filter {
+        background: #2c3338;
+        border-color: #3c434a;
+        color: #f0f0f1;
+    }
+}

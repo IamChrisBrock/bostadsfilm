@@ -137,7 +137,12 @@ function mytheme_enqueue_scripts() {
 
     // Admin scripts
     if (is_admin()) {
-        wp_enqueue_script('admin-js', get_template_directory_uri() . '/assets/js/admin.js', array('jquery', 'jquery-ui-sortable'), '1.0', true);
+        if (!function_exists('is_plugin_active')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        add_action('admin_enqueue_scripts', function() {
+            wp_enqueue_script('admin-js', get_template_directory_uri() . '/assets/js/admin.js', array('jquery', 'jquery-ui-sortable'), '1.0', true);
+        });
     }
 
 
@@ -1301,18 +1306,9 @@ function render_media_text_meta_box($post) {
 
             frame.on('select', function() {
                 var attachment = frame.state().get('selection').first().toJSON();
-                var container = button.closest('.media-upload-section');
-                var input = container.find('input[type="hidden"]');
-                input.val(attachment.id);
-
-                // Update preview
-                if (mediaType === 'image') {
-                    container.find('img').remove();
-                    container.find('.upload-media-button').before('<img src="' + attachment.url + '" style="max-width: 200px;"><br>');
-                } else {
-                    container.find('video').remove();
-                    container.find('.upload-media-button').before('<video style="max-width: 200px;" controls><source src="' + attachment.url + '"></video><br>');
-                }
+                $('#media_text_image').val(attachment.id);
+                $('#media_text_image_preview').attr('src', attachment.url).show();
+                $('#remove_image_button').show();
             });
 
             frame.open();
@@ -1320,7 +1316,7 @@ function render_media_text_meta_box($post) {
     });
     </script>
     <style>
-    .hidden { display: none; }
+        .hidden { display: none; }
     </style>
     <?php
 }
@@ -1539,6 +1535,9 @@ add_filter('wp_get_attachment_image_src', 'fix_svg_size_attributes', 10, 4);
 
 /* Plugins used in Theme */
 function mytheme_recommend_plugins() {
+    if (!function_exists('is_plugin_active')) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
     if (!is_plugin_active('contact-form-7/wp-contact-form-7.php')) {
         echo '<div class="notice notice-warning"><p>Install and activate <strong>Contact Form 7</strong> for full contact form functionality.</p></div>';
     }
